@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>ADO.NET Query</title>
+  <link rel="stylesheet" type="text/css" href="css/widgets.css" title="style" />
+  <style>    
+    i { color:#48A020 }
+    textarea { background-color: #EAEFEA }
+  </style>
+</head>
+
+<body>
+
+<h1>ADO.NET Query</h1>
+<a href="https://onedrive.live.com/embed?cid=D4095215C101CECE&resid=D4095215C101CECE%212921&authkey=ALZWPTJ3YA9v3fI">Version 1.0.1.12 / 2021.09.07.1129</a>
+<hr/>
+
+<ul>
+  <li>
+    <a href="#intro">Introduction</a>
+    <ul>
+      <li><a href="#example1">Example1</a></li>
+    </ul>
+  </li>
+  <li><a href="#providerAndCs">AdoNetProviderName and ConnectionString</a></li>
+  <li><a href="#csBuilder">Connection String Builder</a></li>  
+  <li><a href="#adoNetParams">ADO.NET SQL Parameters</a></li>    
+  <li><a href="#calculatedColumns">Adding Calculated Columns to DataTable</a></li>      
+  <li><a href="#cmdLine">Command Line Interface</a></li>      
+  <li><a href="#configFile">App.Config File</a></li>      
+  <li><a href="#snippetsManager">Snippets Manager</a></li>        
+  <li><a href="#hints">Hints</a></li>      
+</ul>
+
+<a name="1-intro"></a>
+<h2>Introduction</h2>
+<p>
+It is a simple and freeware .NET application to execute queries over <i>ADO.NET data sources</i>.
+<br/>
+It is a quite useful tool in a .NET development practice. 
+It allows to:
+<ul>
+<li>check connectivity of particular <i>ADO.NET data source</i></li>
+<li>check list of available <i>ADO.NET Providers</i> and build appropriate <i>ConnectionString</i> for it</li>
+<li>check some SQL query execution aspects - execution time, parametrization, etc</li>
+<li>check how ADO.NET handle <i>calculated columns</i></li>
+<li>quickly retrieve and inspect data from particular ADO.NET data source</li>
+</ul>
+</p>
+  
+<p>
+So, the idea is:
+<ul>
+<li>On the "<b>Parameters</b>" tab you define what ADO.NET Provider you want to use 
+and define "<b>Connection String</b>" describing how to connect particular <i>ADO.NET data source</i>.</li>
+<li>On the "<b>Query</b>" tab you define what SQL query you want to execute 
+against <i>ADO.NET data source</i> described on the "<b>Parameters</b>" tab.</li>
+<li>Then you can click [Execute] (or press [F9]) to execute SQL query...</li>
+</ul>
+</p>
+
+<a name="example1"></a>
+<p>
+<h3>Example 1: List of tables and columns in DB2 database</h3> 
+If you want to execute an SQL query loading list of tables and columns in DB2 database 
+then you could use something like this:
+<br/>
+<font style="color:navy">
+<br/>Query: <br/>
+<textarea rows="4" cols="120" wrap="off">
+SELECT DISTINCT tbname as TableName, name as ColumnName, coltype as ColumnType
+  FROM sysibm.syscolumns 
+ ORDER BY 1, 2
+   FOR READ ONLY WITH UR 
+</textarea>
+
+<br/>Parameters: <br/>
+<textarea rows="3" cols="120" wrap="off">
+AdoNetProviderName = IBM.Data.DB2
+ConnectionString = Provider=IBMDADB2.1; Location=vmW2k8x64:50000; Data Source=PT2010; User ID=alta; Password=P@zzw0rd;
+</textarea>
+</font>
+
+<br/>In this connection string you can see following names of computer environment objects:
+<ul>
+  <li>vmW2k8x64 - name of computer where DB2 instance is running</li>
+  <li>PT2010 - name of DB2 database to connect</li>
+  <li>alta - name of DB2 database user</li>
+  <li>P@zzw0rd - password for specified DB2 database user</li>
+</ul>
+
+<hr/>
+<a name="providerAndCs"></a>
+<p>
+<h2>AdoNetProviderName and ConnectionString</h2>
+
+The <i>AdoNetProviderName</i> and <i>ConnectionString</i> parameters defines what <i>ADO.NET Provider</i> 
+to use and what <i>ADO.NET data source</i> to connect.
+
+<br/>
+<br/>But it could be configured in a bit more convenient way using substitution parameters. 
+<br/>Identifiers enclosed with "$(", ")" will be replaced with a value of appropriate parameter.
+<br/>For example text pattern "$(DbServer)" will be replaced with the value of "DbServer" parameter.
+<br/> 
+<br/>So, the same connection parameters could be defined like this:
+<br/>
+<textarea rows="8" cols="120" wrap="off">
+AdoNetProviderName = IBM.Data.DB2
+ConnectionString = Provider=IBMDADB2.1; Location=$(DbServer):50000; Data Source=$(DbName); User ID=$(DbUser); Password=$(DbPassword);
+
+DbServer = vmW2k8x64
+DbName = PT2010
+DbUser = alta
+DbPassword = P@zzw0rd
+</textarea>
+<br/><br/>With such approach you could easyly replace <i>ADO.NET Provider</i> name and <i>Connection String</i> 
+without re-typing all connection-specific constants in connection string.
+
+<br/>
+<br/><b>Note:</b> Only 2 parameter names are reserved for special purposes - "AdoNetProviderName" 
+and "ConnectionString". 
+<br/>Exactly these 2 parameters are defining what <i>ADO.NET Provider</i> to use
+and what <i>ADO.NET data source</i> to connect.
+</p>
+
+<hr/>
+<a name="csBuilder"></a>
+<p>
+<h2>Connection String Builder</h2>
+It is a very useful feature. It allows you to see all supported parameters for <i>Connection String</i>
+and add them to your <i>Connection String</i> just in-place.
+<br/>
+<br/>Please click menu -> Parameters -> Connection String Builder... also you can press [F4] to activate it.
+</p>
+
+<hr/>
+<a name="adoNetParams"></a>
+<p>
+<h2>ADO.NET SQL Parameters</h2>
+Inside SQL query you could use references to <i>ADO.NET SQL Parameters</i>.
+<br/>
+<br/>But please keep in mind - different ADO.NET providers use different formats of SQL parameters. 
+<br/>For example MS SQL supports <i>named SQL parameters</i>, so you can use SQL like this:
+<br/>
+<textarea rows="1" cols="80" wrap="off">
+SELECT * FROM User WHERE name = @userName
+</textarea>
+
+<br/>For such SQL query you need to define a <i>named ADO.NET SQL Parameter</i> with name = "@userName".
+
+<br/><br/>Some other ADO.NET providers do not support named SQL parameters, 
+instead they do use a "?" (question mark) in a place where parameter value is expected. 
+<br/>For example:
+<br/>
+<textarea rows="1" cols="80" wrap="off">
+SELECT * FROM User WHERE name = ?
+</textarea>
+<br/>
+
+<br/>Anyway, on the "<b>Parameters</b>" tab you can describe set of <i>ADO.NET SQL Parameters</i> 
+and then use them in SQL query. 
+<br/>For example:
+<br/>
+<textarea rows="3" cols="80" wrap="off">
+sql.prm.@userName = string:ADMIN
+sql.prm.@options = int32:4
+sql.prm.@accessLevel = int64:45789734897123
+</textarea>
+<br/>
+<br/>As you can see SQL parameter definition format is: 
+<br/><font style="font-family:Courier">&nbsp;&nbsp;&nbsp;&nbsp;{"sql.prm."} + {SQL parameter name} + {"="} + {DbType of SQL parameter} + {":"} + {parameter value}</font>
+<br/>
+<br/><i>DbType</i> of SQL parameter should be one of: <i>AnsiString, Binary, Byte, Boolean, Currency,
+Date, DateTime, Decimal, Double, Guid, Int16, Int32, Int64, Object, SByte,
+Single, String, Time, UInt16, UInt32, UInt64, VarNumeric, AnsiStringFixedLength, StringFixedLength, Xml,
+DateTime2, DateTimeOffset</i>. So, it is exactly the list of values defined in the <i>System.Data.DbType</i> enum data type.
+<br/>
+<br/>If <i>SQL parameter name</i> started with "#" and it is a valid number then application will create and 
+use <i>un-named SQL parameter</i> (I mean the descendant of <i>DbParameter</i> class which has <i>ParameterName</i>
+property not initialized).
+<br/>
+</p>
+
+<hr/>
+<a name="calculatedColumns"></a>
+<p>
+<h2>Adding <i>Calculated Columns</i> to <i>DataTable</i></h2>
+You could add <i>calculated columns</i> to resultset retrieved from a <i>data source</i>.
+<br/>
+<br/>In particular, you could define calculated columns on "<b>Parameters</b>" tab. 
+<br/>For example:
+<br/>
+<textarea rows="3" cols="80" wrap="off">
+table.column.MyCalculatedColumn1(double) = UnitPrice * Qty * 0.97
+table.column.MyCalculatedColumn2(int) = max(ProjID)
+table.column.MyCalculatedColumn3 = min(RevFilename)
+</textarea>
+
+<br/>As you can see the definitions format is following:
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;
+<font style="font-family:Courier">table.column.<i>ColumnName</i>[ (<i>ColumnType</i>) ] = <i>ColumnExpression</i></font>
+<br/>So, mandatory parts are only <i>ColumnName</i> and <i>ColumnExpression</i>, the <i>ColumnType</i> 
+(which is specified in a round brakets) is optional; by default <i>ColumnType</i> is <i>string</i>.
+
+<br/>
+<br/><b>Please note:</b> the list of all supported operators for <i>calculated columns</i>
+could be found here: <a href="http://msdn.microsoft.com/en-us/library/system.data.datacolumn.expression.aspx">
+http://msdn.microsoft.com/en-us/library/system.data.datacolumn.expression.aspx</a>.
+</p>
+
+<hr/>
+<a name="cmdLine"></a>
+<p>
+<h2>Command Line Interface</h2>
+This tool could be used as command line utitility.
+<br/>Here is the list of supported command line parameters:
+<br/>
+<textarea rows="20" cols="120" wrap="off">
+  -?  - print this message
+  -copyright, -eula  - print a license agreement
+  -cp, --conn-param={text}  - add specified line to connection parameters
+  -eev, --expand-env-vars[=1|0]  - set Expand Environment Variables flag
+  -exec, --execute  - execute current query with current ADO.NET parameters
+  -exit - exit application
+  -hc, --hold-connection  - switch hold-connection flag
+  -q, --query={SqlQuery}  - SQL query to execute
+  -qf, --query-file={filename}  - filename with SQL queries to execute
+  -ite, --ignore-to-end  - ignore all cmdline parameters after this parameter
+  -rcp, --reset-conn-params  - cleanup all connection parameters
+  -sn, --snippet={SnippetName}  - choose snippet with specified name
+  -snqry, --snippet-query={SnippetName}  - use query from snippet with specified name
+  -snprm, --snippet-params={SnippetName}  - use parameters from snippet with specified name
+  -sprm, --set-param={name,value}  - set value of specified parameter or add if parameter not found
+  -srx, --save-result-xml={filename}  - same query results into specified XML file
+  -src, --save-result-csv={filename}  - same query results into specified CSV file
+
+Example:
+  AdoNetQuery.exe -query=\"SELECT userid FROM usr ORDER BY userid\" -execute -save-result-csv=users-list.txt -exit
+  AdoNetQuery.exe -snippet=\"ListOfUsers\" -execute -save-result-csv=users-list.txt -exit
+</textarea>
+</p>
+
+<hr/>
+<a name="configFile"></a>
+<p>
+<h2>App.Config File</h2>
+Application configurarion file (<i>AdoNetQuery.exe.config</i> and <i>AdoNetQuery_x86.exe.config</i>) 
+contains following useful sections:
+<ul>
+  <li>
+    &lt;appSettings&gt;
+    <ul>
+      <li><u>QueryText</u> - you can specify default text of SQL query here.</li>
+      <li><u>ParametersText</u> - you can specify default text of Parameters here.</li>
+    </ul>
+  </li>
+  <li>
+    <u>ConnectionStrings</u> 
+    - you can specify here connection string templates which could be useful for you, all of them will be accessible via application menu -> Parameters -> Connection Strings.
+    <br/>Format of items in this section is following: <i>Menu item caption = {AdoNetProviderName} + ~ + {ConnectionString}</i>.
+    <br/>You can use $(...) parameters inside such connection strings, all used parameters will be added to list of 
+    parameters in UI automatically.
+  </li>
+  <li>
+    <u>UsefulLinks</u> 
+    - you can specify here useful web-links to display in application menu -> Help -> Useful Links
+    <br/>Format of items in this section is following: <i>Menu item caption = {URL}</i>.
+  </li>
+</ul>
+</p>
+
+<hr/>
+<a name="snippetsManager"></a>
+<p>
+<h2>Snippets Manager</h2>
+<i>Snippets Manager</i> allows you to collect useful pieces of SQL queries 
+and ADO.NET parameters in one place.
+
+<br/>
+<br/>Click menu -> Query -> Snippets Manager...
+
+<br/><br/>
+Some important notes:
+<ul>
+  <li>
+    Snippets are stored in a <i>AdoNetQuery.snippets</i> file of XML format.
+    <br/>Original file supposed to be in the same directory as AdoNetQuery exe files.
+    <br/>But after first usage AdoNetQuery.snippets file will be copied into {CommonApplicationData} folder
+    <br/>So, the path to this file will be like this: <i>C:\ProgramData\AdoNetQuery\AdoNetQuery.snippets</i>.
+    <br/>AdoNetQuery.snippets file from directory with AdoNetQuery exe files will be automatically copied 
+    into {CommonApplicationData} folder when it detects a newer file timestamp for source snippets file.
+    So, please be careful and make backups of your edited AdoNetQuery.snippets file in {CommonApplicationData} folder
+    if you going to update application executables.
+  </li>
+  <li>
+    After you selected a snippet in Snippets Manager you can click "Apply" to insert selected 
+    snippet into AdoNetQuery. 
+    Or you can click "Apply only query" or "Apply only parameters" to insert only query or only parameters.
+  </li>
+  <li>
+    You can use snippets from cmdline interface. You can use a full name (like path) of a snippet in collection 
+    or you can use snippet name directly.
+    In case when you using snippet name (without path in collection) it will try to find first matching snippet by specified name.
+    For example - following 3 names are pointing to the same snippet in collection:
+    <ul>
+      <li>"DB2 .NET"</li>
+      <li>"Provider Examples/DB2 .NET"</li>
+      <li>"Snippets/Provider Examples/DB2 .NET"</li>
+    </ul>
+    That is because sample collection of snippets contains only one snippet which has "DB2 .NET" name.
+    <br/>When you are using a full item path in snippets collection there is less chances to match wrong 
+    snippet if there could be a one with the same name.
+  </li>
+</ul>
+</p>
+
+<hr/>
+<a name="hints"></a>
+<p>
+<h2>Hints</h2>
+<ul>
+
+<li>Inside the application config file (AdoNetQuery.exe.config or AdoNetQuery_x86.exe.config) 
+you could define useful urls (in the &lt;UsefulLinks&gt; section).
+They will be shown in the main menu of application: <i>menu -> Help -> Usefull Links</i>.</li>
+
+<li>Also in the application config you could define a set of your "favourite" connection strings.
+See the &lt;ConnectionStrings&gt; section. They will be available in application main menu: 
+<i>menu -> Parameters -> Connection Strings</i>.</li>
+
+<li>Double-clicking a row in the <i>ADO.NET Providers List</i> inserting selected provider name
+as a value for the "AdoNetProviderName" parameter.
+</li>
+
+<li>The <i>Connection String Builder</i> check-marks items which are currently defined in 
+your <i>Connection String</i> parameter. When uncheck item in a list the <i>Connection String Builder</i>
+removes it from your <i>Connection String</i> parameter. When check item in a list it will add it.
+</li>
+
+<li>When double-click an item in the <i>menu -> Parameters -> Connection Strings -> {name}</i> it
+will replace values for "AdoNetProviderName" and "ConnectionString" parameters.
+</li>
+
+<li>By default log file is written into %TEMP% directory. 
+You can change that in App.Config file.
+</li>
+
+<li>You can use "--" (2 minus chars) as line comment in SQL (actually, "//" comments also works). 
+But in current version you can comment only a whole line. 
+You cannot comment part of line in SQL. So, if you want to keep some statement in query
+but exclude it from execution you need put it at new line and start line with "--" to comment it out.
+</li>
+
+<li><i>Expand Environment Variables</i> flag defines if it should expand environment variables in 
+parameters and in query. You can toggle this flag in UI, also from cmdline.
+</li>
+
+<li>When snippets file installed into {CommonApplicationData} folder file permissions will be adjusted 
+to enable <i>FullControl</i> access for <i>Everyone</i> user account.
+</li>
+
+<li>You can use multiple <i>-execute</i> in cmdline, for one query or for different queries, 
+the same works for other cmdline action-options.
+Example:
+<br/>
+<textarea rows="2" cols="120" wrap="off">
+AdoNetQuery.exe -snippet="CleanupOrders" -execute -snippet="CleanupTrace" -execute -snippet="SetupTestCase" -execute  -exit
+</textarea>
+</li>
+
+<li>All passwords, computer and database names in snippets were altered, so they do not match my real system.
+However, they are useful as an example.
+</li>
+
+</ul>
+</p>
+
+<hr/>
+Copyright Dmitry Bond. (<a href="mailto:dima_ben@ukr.net">dima_ben@ukr.net</a>), (c) 2012-2015.
+</body>
+
+</html>

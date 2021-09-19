@@ -1,0 +1,2531 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>XService.Net2</name>
+    </assembly>
+    <members>
+        <member name="T:System.Diagnostics.TraceSwitchEx">
+            <summary>
+            TraceSwitchEx is extended version of TraceSwitch.
+            The main difference - it register all instanced in TraceSwitchEx.Instances list.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.TraceSwitchEx.Unregister(System.Diagnostics.TraceSwitch)">
+            <summary>Unregister (remove) specified instances of TraceSwitchEx from list of instances</summary>
+        </member>
+        <member name="M:System.Diagnostics.TraceSwitchEx.#ctor(System.String,System.String)">
+            <summary>Calling constructor of TraceSwitch and register object instance in TraceSwitchEx.Instances list</summary>
+        </member>
+        <member name="M:System.Diagnostics.TraceSwitchEx.#ctor(System.String,System.String,System.String)">
+            <summary>Calling constructor of TraceSwitch and register object instance in TraceSwitchEx.Instances list</summary>
+        </member>
+        <member name="P:System.Diagnostics.TraceSwitchEx.Instances">
+            <summary>All instances of TraceSwitchEx will be saved in this list</summary>
+        </member>
+        <member name="T:System.Diagnostics.AdvancedTraceListener">
+            <summary>
+            AdvancedTraceListener is extended version of TextWriterTraceListener class.
+            It supports many nice features like - log files cleanup and rotation, log records formatting and so on.
+            
+            Full list of supported options:
+              * MaxFileSize = {number}[kb|mb] - max log file size, when bigger it will perform log routing (by size or by filename)
+              * Encoding = {encoding} - text encoding for log file
+              * SavedLogPercents = {number} - how many percents of log file to save when doing log file routing by size
+              * LogSizeOverAction = {Nothing|ResetSize|Rename}  - method of log file routing: nothing or save only 1st NN percents of log or rename log file to *.Lnn
+              * MaxRenamedFiles = {number} - how many renamed log files to save when LogSizeOverAction=Rename
+              * LinePrefix = {text} - pettern to insert in front of each log line
+              * TimeRouteFilenamePattern = {timestamp-pattern} - pattern for timestamp value to router log files (timestamp value will be inserted as suffix into log filename)
+              * TimeStampFormat = {timestamp-pattern} - pattern for timestamp value to insert in front of each log line
+              * AutoFlush = {false|TRUE} - auto-flush after each log write
+              * CleanupOlderThan = {number} [weeks|days|hours|] - auto-delete routed log files which are older than specified time interval, when time specifier is not specified then it is time in minutes
+              
+            Here is example of section in app.config:
+            <example>
+                <system.diagnostics>
+                   <!-- [...] -->
+                   <trace autoflush="true">
+                       <listeners>
+                           <add name="defaultLogger" type="System.Diagnostics.AdvancedTraceListener, XService.Net2"
+                                initializeData="$XService-TestApp-$(TimeRoute)-$(PID).log;LinePrefix=${TID};TimeRouteFilenamePattern=yyyyMMdd-HH;CleanupOlderThan=7days"/>
+                       </listeners>
+                   </trace>
+               </system.diagnostics>
+            </example>
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.AdvancedTraceListener.ReopenWriter">
+            <summary>Will close existent writer, rename log file(s), open writer again</summary>
+        </member>
+        <member name="M:System.Diagnostics.AdvancedTraceListener.getSuffixedFilename(System.String,System.String)">
+            <summary>Add specified suffix to filename (insert in front of file extension)</summary>
+            <param name="pFilename">Filename to insert suffix into</param>
+            <param name="pSuffix">Suffix to insert</param>
+            <returns>Filename with inserted suffix</returns>
+        </member>
+        <member name="M:System.Diagnostics.AdvancedTraceListener.InitWriter">
+            <summary>
+            This method opens StreamWriter on first access to the Trace.
+            In case of failure it will keep silence because logging and tracing 
+            should not stop application!
+            But each next attempt to write to Trace will result new attempt 
+            to open StreamWriter then you could fix trace file location access
+            problems at run-time without stopping the application.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:System.Diagnostics.TraceUtils.FindListener(System.Type)">
+            <summary>
+            Search TraceListener of specified type
+            </summary>
+            <param name="pType"></param>
+            <returns></returns>
+        </member>
+        <member name="T:System.Diagnostics.CallbackTraceListener">
+            <summary>
+            Summary description for MyTraceListener.
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:XService.Configuration.ExternalCommands" -->
+        <member name="M:XService.Configuration.ExternalCommands.Execute(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Execute command</summary>
+            <param name="pCommandName">Name of command to execute</param>
+            <param name="pParamsDefs">String which contains additional run-time parameters command execution (key1=value1;...)</param>
+            <param name="pExtraParameters">Extra run-time parameters</param>
+            <returns></returns>
+        </member>
+        <member name="T:XService.Configuration.ExternalCommand">
+            <summary>
+            ExternalCommand - object to hold configuration infromation about prepconfigured external command
+            </summary>
+        </member>
+        <member name="M:XService.Configuration.ExternalCommand.parseSyncEventsDefinitions">
+            <summary>
+            parseSyncEventsDefinitions
+            Create synchronization events according to a list.
+            List items delimited only by ';' (semicolon).
+            Every item in a list has following format:
+                [prefix+]{EventName}[ ( {directivesList} ) ]
+            Where {prefix} is a set of following chars:
+                '@' used to use default event state
+                '+' used to set event before run a command
+                '-' used to reset event before run a command
+                '?' used to add event to a wait-list, so it will wait for it before starting a program 
+                '$' used to add event to a wait-list, so it will wait for it after program's start completed
+            Note: is not recommeneded to use use {prefix}, it is deprecated feature.
+            The directivesList is a pipe-separated list of event processing directives, which are:
+                "autosetBefore" - set event automatically before program start
+                "autoset" or "autosetAfter" - set event automatically after program finished
+                "default" - to create event object but not to change its state directly
+                "set" or "reset" - to set or reset event
+                "noWait", "waitBefore", "waitAfter" or "waitBoth" - to define event wait option
+            New format:
+                {EventName}[:default|set|reset|waitBefore|waitAfter|waitBoth]
+            </summary>
+            <param name="pSyncEventsDefs"></param>
+        </member>
+        <member name="T:XService.Configuration.SyncEventDescriptor">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:XService.Configuration.IniParameters">
+            <summary>
+            IniParameters
+            To load a config section which is describing configuration parameters in a ini-file-like format.
+              <configSections>
+                <section name="RuntimeParameters" type="XService.Configuration.IniParameters, XService.Net2" />
+              </configSections>
+            </summary>
+        </member>
+        <member name="T:XService.Configuration.ConfigXml">
+            <summary>
+            ConfigXml 
+            To access XML of a config section directly.
+            <example>
+              <configSections>
+                <section name="TestCaseDescriptor" type="XService.Configuration.ConfigXml, XService.Net2" />
+              </configSections>
+              <TestCaseDescriptor>
+                <node1 attr="123">some text</node1>
+                <node2>
+                  <node3>some other text</node3>
+                </node2>
+              </TestCaseDescriptor>
+            // Then in a code you can do something like this:
+              XmlElement cfgSection = (XmlElement)ConfigurationManager.GetSection("TestCaseDescriptor");
+              if (cfgSection != null)
+              {
+                // ... here you can directly access DOM/XML section in config file ...
+              }
+            </example>
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.ConsoleTraceListener">
+            <summary>
+            Summary description for MyTraceListener.
+            </summary>
+        </member>
+        <member name="T:XService.Utils.IO.InteractiveShellHandler">
+            <summary>
+            Interactive shell which supports executing shell commands 
+            </summary>
+        </member>
+        <member name="M:XService.Utils.IO.InteractiveShellHandler.Start">
+            <summary>Ensure CMD started</summary>
+        </member>
+        <member name="M:XService.Utils.IO.InteractiveShellHandler.ExecuteCmd(System.String,System.String)">
+            <summary>Execute specified interactive command, set specified LogMarker while executing</summary>
+            <param name="pCmd">Interactive command to execute</param>
+            <param name="pLogMarker">Log marker to use while command running</param>
+        </member>
+        <member name="M:XService.Utils.IO.InteractiveShellHandler.ExecuteCmd(System.String)">
+            <summary>Execute specified interactive command</summary>
+            <param name="pCmd">Interactive command to execute</param>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.ShellCommand">
+            <summary>Shell command to start interactive shell processor</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.ShellInitialization">
+            <summary>Shell initialization command (optional)</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.ShellMarker">
+            <summary>Shell marker how to recognize end of interactive command execition</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.LogMarker">
+            <summary>String to mark log output</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.CurrentCommand">
+            <summary>Currently executing command</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.Output">
+            <summary>Full output of interactive session</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.CmdOutput">
+            <summary>Output of interactive command execition (last executed command)</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.Started">
+            <summary>When shell was started (if still alive)</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.CommandStarted">
+            <summary>When last command started</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.CommandCompleted">
+            <summary>When last command completed</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.ExecutionTime">
+            <summary>Elapsed execution time of last command</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.IsAlive">
+            <summary>Returns true if CMD still alive</summary>
+        </member>
+        <member name="P:XService.Utils.IO.InteractiveShellHandler.IsBusy">
+            <summary>Returns true if shell still executing some command</summary>
+        </member>
+        <member name="T:XService.Utils.IO.InteractiveShellHandler.CmdExecNotificationMethod">
+            <summary>Notification on command execution. When pText is null that means - command execution just started</summary>
+        </member>
+        <member name="T:XService.Security.LicenseKey">
+            <summary>
+            The LicenseKey is used to validate LicenseKey value over the current system to see if application is allowed to run on current system.
+            </summary>
+        </member>
+        <member name="M:XService.Security.LicenseKey.Validate">
+            <summary>
+            Validate LicenseKey value over the current system.
+            List of predefined license property names: Dummy, Computer, StartDate, ExpireDate, WindowsUser, IpAddress, MacAddress.
+            Assume that any other license properties should be supplied in the pExtraProperties parameter for LicenseKey.Check static method.
+            Note: license property name may have special prefixes - '#' to comment/disable property, '?' - to mark property as optional.
+            If license property is marked as 'optional' it means that - if such property is not found on current system it will not be valdiated over the specified license-key.
+            Predefined license properties cannot be marked as 'optional'.
+            </summary>
+            <returns>Returns true is validation was successfull. Could throw a LicenseKeyError exception in case if it cannot validate LicenseKey.</returns>
+        </member>
+        <member name="M:XService.Security.LicenseKey.IsMatchLicenseProp(System.String,System.String)">
+            <summary>
+            Check if specified current property value is match expected property value.
+            </summary>
+            <param name="pExpectedPropValue">The expected property value. If started with '/' it will be processed as a regular expression, 
+            so regular expression will be extracted from 1st '/' until last '/'.</param>
+            <param name="pCurrentPropValue">The current property value.</param>
+            <returns>Returns true if current property value is match expected property value.</returns>
+        </member>
+        <member name="P:XService.Security.LicenseKey.Value">
+            <summary>
+            LicenseKey to validate over current system
+            </summary>
+        </member>
+        <member name="P:XService.Security.LicenseKey.ExtraProperties">
+            <summary>
+            Extra properties of current system that could match over the LicenseKey properties
+            </summary>
+        </member>
+        <member name="P:XService.Security.LicenseKey.LicenseProperties">
+            <summary>
+            Decoded LicenseKey properties - the set of properties that identify a valid system where application is allowed to run
+            </summary>
+        </member>
+        <member name="P:XService.Security.LicenseKey.ErrorMessages">
+            <summary>
+            List of LicenseKey validation errors
+            </summary>
+        </member>
+        <member name="T:XService.Utils.MimePackage">
+            <summary>
+            Parser and holder of file content encoded as MIME/base64.
+            This class can decode MIME/base64 encoded files (which created by TotalCommander or similar tools).
+            But the difference is - all MIME/base64 code must be enclosed within root XML element! 
+            XML-encapsulation is required to make it possible to save such file in db
+            
+            Example of MIME header generated by TotalCommander:
+              MIME-Version: 1.0
+              Content-Type: application/octet-stream; name="QueryLogo_BY.png"
+              Content-Transfer-Encoding: base64
+              Content-Disposition: attachment; filename="QueryLogo_BY.png"
+            </summary>
+        </member>
+        <member name="M:XService.Utils.MimePackage.Load(System.String)">
+            <summary>Load 1st MIME-encoded entity from specified file</summary>
+            <returns>MimePackage object or null when enable to decode</returns>
+        </member>
+        <member name="M:XService.Utils.MimePackage.Load(System.IO.FileInfo)">
+            <summary>Load 1st MIME-encoded entity from specified file</summary>
+            <returns>MimePackage object or null when enable to decode</returns>
+        </member>
+        <member name="M:XService.Utils.MimePackage.Load(System.String[],System.Int32@)">
+            <summary>Load 1st MIME-encoded entity from specified file</summary>
+            <param name="pLines">Array of lines to scan</param>
+            <param name="pLineIndex">Ref: line index to start, it will return here line index where it stop</param>
+            <returns>MimePackage object or null when enable to decode</returns>
+        </member>
+        <member name="M:XService.Utils.MimePackage.LoadMultiple(System.IO.FileInfo)">
+            <summary>Load all MIME-encoded entities from specified file</summary>
+            <returns>MimePackage[] array of decoded entities, when no entities decoded that will be an empty array</returns>
+        </member>
+        <member name="M:XService.Utils.MimePackage.LoadMultiple(System.String[],System.Int32@)">
+            <summary>Load all MIME-encoded entities from specified file</summary>
+            <param name="pLines">Array of lines to scan</param>
+            <param name="pLineIndex">Ref: line index to start, it will return here line index where it stop</param>
+            <returns>MimePackage[] array of decoded entities, when no entities decoded that will be an empty array</returns>
+        </member>
+        <member name="M:XService.Utils.MimePackage.SaveToDirectory(System.String)">
+            <summary>Save file data into specified directory, keeping filename specified in MIME header</summary>
+            <param name="pPath"></param>
+        </member>
+        <member name="T:XService.ObjectRefCounter">
+            <summary>
+            The idea is - when refCount == 0 it will release/dispose a referenced object.
+            Usage example:
+                ObjectRefCounter.RefCount objRf = new ObjectRefCounter.RefCount(dbConnection);
+                using (ObjectRefCounter rf = new ObjectRefCounter(objRf))
+                {
+                }
+            </summary>
+        </member>
+        <member name="T:XService.Security.PwdEncryptor">
+            <summary>
+            Password encryption service routinues
+            </summary>
+        </member>
+        <member name="F:XService.Security.PwdEncryptor.SecureKey">
+            <summary>Password key to encrypt/decrypt passwords</summary>
+        </member>
+        <member name="F:XService.Security.PwdEncryptor.DefaultEncoding">
+            <summary>Default text encoding</summary>
+        </member>
+        <member name="M:XService.Security.PwdEncryptor.EncryptPassword(System.String)">
+            <summary>Main API: password decryptor method</summary>
+            <param name="pPasswordCodes">Encrypted password to decrypt</param>
+            <returns>Decrypted password</returns>
+        </member>
+        <member name="M:XService.Security.PwdEncryptor.DecryptPasswordSS(System.String)">
+            <summary>Main API: password decryptor method</summary>
+            <param name="pPasswordCodes">Encrypted password to decrypt</param>
+            <returns>Decrypted password</returns>
+        </member>
+        <member name="M:XService.Security.PwdEncryptor.DecryptPassword(System.String)">
+            <summary>Main API: password decryptor method</summary>
+            <param name="pPasswordCodes">Encrypted password to decrypt</param>
+            <returns>Decrypted password</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "T:XService.Components.ScriptGenerator" -->
+        <member name="M:XService.Components.ScriptGenerator.GetVariable(System.String)">
+            <summary>Get value of specified variable. First it will try to get variable using a path of template</summary>
+            <param name="pVarName">Name of variable</param>
+            <returns>Value of variable or null when not found</returns>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.SetVariable(System.String,System.Object)">
+            <summary>Set value of specified variable. When it is a sub-generator then it will automatically add a path of template in front of variable name</summary>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.ExpandMacroValues(System.String)">
+            <summary>Expand macro values in specified text</summary>
+            <param name="pText">Text to expand macro values in</param>
+            <returns>Text with replaced macro values</returns>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.Start(System.String)">
+            <summary>Begin script generarion (reset internal structures for new script generation)</summary>
+            <param name="pTemplateName"></param>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.AddHeader">
+            <summary>Add script header to output</summary>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.AddItem(System.Object,System.String)">
+            <summary>Add script item to output</summary>
+            <param name="pItem">Data item</param>
+            <param name="pItemName">Optional. Name of item template to use (or null to use default)</param>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.AddItemText(System.String)">
+            <summary>Add item text to output</summary>
+            <param name="pItemText">item text</param>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.AddFooter">
+            <summary>Add script footer to output</summary>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.Finish">
+            <summary>Finish script generation, return script output as string</summary>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.Generate(System.String,System.Object)">
+            <summary>Generate script for specified data item according to specified template. It will call Start, AddHeader, then make number of calls to AddItem if some items specified then call AddFooter and Finish</summary>
+            <param name="pTemplateName">Name of script template to use</param>
+            <param name="pData">Data item to use as data source</param>
+            <returns>Returns generated script as string</returns>
+        </member>
+        <member name="M:XService.Components.ScriptGenerator.applyItemFilter(System.Object@,XService.Components.ScriptGenerator.Template.TemplateItem)">
+            <summary>Return true to include item into output, return false to skip item</summary>
+        </member>
+        <member name="P:XService.Components.ScriptGenerator.TemplateName">
+            <summary>Name of current(active) template or null when there is no active template</summary>
+        </member>
+        <member name="P:XService.Components.ScriptGenerator.Variables">
+            <summary>Container of variables. Template names are uppercased. </summary>
+        </member>
+        <member name="P:XService.Components.ScriptGenerator.Templates">
+            <summary>Container of templates. Template names are uppercased.</summary>
+        </member>
+        <member name="P:XService.Components.ScriptGenerator.Template.Item">
+            <summary>Return 1st item in collection of items</summary>
+        </member>
+        <member name="T:XService.Security.SecureText">
+            <summary>
+            SecureText is a class to encode/decode sensitive data such as password and so on.
+            </summary>
+        </member>
+        <member name="M:XService.Security.SecureText.SetSecurMethod(System.Int32)">
+            <summary>
+            Set encoding method. Return previously used method.
+            Where pMethodId could have one of values: 
+            -1 - return current MethodId, do not change anything;
+            0 - reset to default (recommened) MethodId;
+            1..N - set MethodId.
+            </summary>
+        </member>
+        <member name="M:XService.Security.SecureText.GetSecurKey">
+            <summary>Return current password used to encode/decode data</summary>
+        </member>
+        <member name="M:XService.Security.SecureText.SetSecurKey(System.String)">
+            <summary>Set password to encode/decode data</summary>
+        </member>
+        <member name="M:XService.Security.SecureText.EncodeSecuredText(System.String,System.String@)">
+            <summary>Encode specified text</summary>
+            <param name="pText">Text to encode</param>
+            <param name="pEncodedText">Encoded text</param>
+        </member>
+        <member name="M:XService.Security.SecureText.DecodeSecuredText(System.String,System.String@)">
+            <summary>Decode previously encoded text</summary>
+            <param name="pText">String with previously encoded text</param>
+            <param name="pDecodedText">Decoded text</param>
+            <returns>Returns true in case when text was successfully decoded, otherwise returns false and pDecodedText set to null</returns>
+        </member>
+        <member name="M:XService.Security.SecureText.IncludeMethodId(System.String@,System.Int32)">
+            <summary>Ensure to include methodId into encoded text</summary>
+            <param name="pText">String with encoded text</param>
+            <param name="pMethodId">MethodID to include into encoded text</param>
+        </member>
+        <member name="M:XService.Security.SecureText.IsEcryptedPattern(System.String)">
+            <summary>
+            Validate if specified text match pattern of encoded text.
+            Assume it should with MethodId and checksum - full form of encrypted text
+            </summary>
+            <param name="pText">Text to validate</param>
+            <returns>Returns true if specified text match pattern of encoded text</returns>
+        </member>
+        <member name="P:XService.Security.SecureText.Instance">
+            <summary>Return instance of SecureText object to work with</summary>
+        </member>
+        <member name="T:XService.Utils.MemoryStoragePool">
+            <summary>
+            Pool of big storage objects (memory streams). 
+            Such storage objects used to decrease usage of Big-Object-Heap memory in .NET.
+            
+            Before usage need to initialize it, like this: 
+              MemoryStoragePool.Instance = new MemoryStoragePool(1024 * 1024, 32);
+            </summary>
+        </member>
+        <member name="M:XService.Utils.MemoryStoragePool.#ctor(System.Int32,System.Int32)">
+            <summary>Create MemoryStoragePool instance</summary>
+            <param name="pOneStreamSize">Size of one cell in storage</param>
+            <param name="pCellsCount">Number of cell to create initially</param>
+        </member>
+        <member name="M:XService.Utils.MemoryStoragePool.AllocateCell">
+            <summary>Allocate new storage object and mark it as 'allocated'</summary>
+        </member>
+        <member name="M:XService.Utils.MemoryStoragePool.Dump">
+            <summary>Dump to Trace information on all cells in storage</summary>
+        </member>
+        <member name="P:XService.Utils.MemoryStoragePool.CellSize">
+            <summary>Get or set size of one cell in storage. When size changed it will not affect existing cells</summary>
+        </member>
+        <member name="P:XService.Utils.MemoryStoragePool.CellsCount">
+            <summary>Get or set number of cells in storage. When less than number of existing cells it will delete extra, when bigger it will create more cells</summary>
+        </member>
+        <member name="T:XService.Utils.MemoryStoragePool.StorageCellWrapper">
+            <summary>Wrapper for StorageCell to auto-release after usage. It can be used in using (...) { ... } statement</summary>
+            <example>
+            using (MemoryStoragePool.StorageCellWrapper cell = MemoryStoragePool.Instance.AllocateCell()) 
+            {
+              MemoryStream strm = cell.Stream;
+              // [...]
+            }  
+            </example>
+        </member>
+        <member name="T:XService.Utils.MemoryStoragePool.StorageCell">
+            <summary>Holder for storage object with allocated/free indicator. It is not intended for direct usage</summary>
+        </member>
+        <member name="T:PAL.XmlRegistry">
+            <summary>
+            XmlRegistry - the object simulating behaviour of 'windows system registry' but use an XML file as storage.
+            For example - it could be used on platforms where 'system registry' does not exists but need a similar approach.
+            Also it could be used to store some specific configuration in a form of hierarchy like 'windiws system registry' does.
+            </summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.Flush">
+            <summary>Flush changes if Is-Modified flag is set</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.Save">
+            <summary>Force save changes</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.SaveAs(System.String)">
+            <summary>Save registry into specified file</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.CreateKey(System.String)">
+            <summary>Create and return registry key with specified path</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.OpenKey(System.String,System.Boolean)">
+            <summary>Try to open registry key with specified path</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.KeyExists(System.String)">
+            <summary>Returns true when registry key with specified path exists</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.ValueExists(System.String)">
+            <summary>Returns true when registry value with specified path exists</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.KeyNamesAt(System.String)">
+            <summary>Returns array of registry key names at specified path</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.ItemNamesAt(System.String)">
+            <summary>Returns array of registry value names at specified path</summary>
+        </member>
+        <member name="M:PAL.XmlRegistry.RemoveKey(System.String)">
+            <summary>Remove specified key from registry</summary>
+        </member>
+        <member name="P:PAL.XmlRegistry.XmlDom">
+            <summary>Get XmlDocument object for this registry storage</summary>
+        </member>
+        <member name="P:PAL.XmlRegistry.FileName">
+            <summary>Get filename of this registry</summary>
+        </member>
+        <member name="P:PAL.XmlRegistry.Options">
+            <summary>Get or set options for this registry</summary>
+        </member>
+        <member name="P:PAL.XmlRegistry.IsModified">
+            <summary>Get or set Is-Modified flag for this registry</summary>
+        </member>
+        <member name="P:PAL.XmlRegistry.Item(System.String)">
+            <summary>Access registry item</summary>
+            <param name="pRegPath">Full path of registry item</param>
+            <returns>
+            If pRegPath is a path of registry key it will return string[] - list of key and value names in specified registry key. Key names will have "\" as suffix.
+            If pRegPath is a path of registry value it will return a value.
+            </returns>
+        </member>
+        <member name="T:PAL.XmlRegistryKey">
+            <summary>
+            XmlRegistryKey
+            </summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.Close">
+            <summary>Close this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.ValueExists(System.String)">
+            <summary>Returns true when value with specified name is exists in this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.ReadString(System.String)">
+            <summary>Read string value with specified name from this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.ReadText(System.String)">
+            <summary>Read text value with specified name from this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.ReadInteger(System.String)">
+            <summary>Read integer value with specified name from this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.ReadDouble(System.String)">
+            <summary>Read double value with specified name from this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.ReadBytes(System.String)">
+            <summary>Read raw data value (array of bytes) with specified name from this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.WriteString(System.String,System.String)">
+            <summary>Write string value with specified name into this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.WriteText(System.String,System.Text.StringBuilder)">
+            <summary>Write text value with specified name into this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.WriteInteger(System.String,System.Int32)">
+            <summary>Write integer value with specified name into this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.WriteDouble(System.String,System.Double)">
+            <summary>Write double value with specified name into this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.WriteBytes(System.String,System.Byte[])">
+            <summary>Write raw data value with specified name into this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.RemoveValue(System.String)">
+            <summary>Write raw data value with specified name into this XmlRegistryKey object</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.Refresh">
+            <summary>Reload and merge registry key definitions</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.EnsureTag(System.String)">
+            <summary>Ensure specified tag defined for this registry key</summary>
+        </member>
+        <member name="M:PAL.XmlRegistryKey.EnsureNoTag(System.String)">
+            <summary>Ensure specified tag defined for this registry key</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.DomNode">
+            <summary>Get DOM node for this XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.Name">
+            <summary>Get name of this XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.Path">
+            <summary>Get full path of this XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.Attributes">
+            <summary>Get or set attibutes of this XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.IsContainer">
+            <summary>Returns true when this registry object is container for values</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.ValueType">
+            <summary>Get type of this value object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.Value">
+            <summary>Get or set value for this registry item</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.Owner">
+            <summary>Get owner XmlRegistry object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.IsOpened">
+            <summary>Returns true when this XmlRegistryKey object is opened (valid for usage)</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.ItemsCount">
+            <summary>Returns number of items in this XmlRegistryKey object (Keys and Values)</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.KeyNames">
+            <summary>Returns array of key names in this XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.ValueNames">
+            <summary>Returns array of value names in this XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryKey.Item(System.String)">
+            <summary>Access specified XmlRegistryItem in this XmlRegistryKey object (by its name)</summary>
+        </member>
+        <member name="T:PAL.XmlRegistryItem">
+            <summary>
+            XmlRegistryItem
+            </summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.DomNode">
+            <summary>Get DOM node for this value object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.Name">
+            <summary>Get name of this value object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.Attributes">
+            <summary>Get or set attributes of this value object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.ValueType">
+            <summary>Get type of this value object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.Value">
+            <summary>Get or set value for this registry item</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.Owner">
+            <summary>Get owner XmlRegistryKey object</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.IsText">
+            <summary>Returns true when this value object is a text (String or StringBuilder)</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.IsNumber">
+            <summary>Returns true when this value object is a number (int, float or double)</summary>
+        </member>
+        <member name="P:PAL.XmlRegistryItem.IsRawData">
+            <summary>Returns true when this value object is a raw data (array of bytes)</summary>
+        </member>
+        <member name="T:XService.Utils.CollectionUtils">
+            <summary>
+            StrUtils - utilities to manipulate strings.
+            </summary>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.Join(System.Array,System.String)">
+            <summary>
+            Concatenate all items in specified Array using specified delimiter. 
+            </summary>
+            <param name="pList">Array with items to concatenate</param>
+            <param name="pDelimiter">Delimiter to use</param>
+            <returns>String of concatenated array items</returns>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.Join(System.Collections.IList,System.String)">
+            <summary>
+            Concatenate all items in specified list using specified delimiter. 
+            </summary>
+            <param name="pList">List with items to concatenate</param>
+            <param name="pDelimiter">Delimiter to use</param>
+            <returns>String of concatenated list items</returns>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.Join(System.String[],System.String)">
+            <summary>
+            Concatenate all items in specified string[] array using specified delimiter. 
+            </summary>
+            <param name="pItems">string[] array with items to concatenate</param>
+            <param name="pDelimiter">Delimiter to use</param>
+            <returns>String of concatenated array items</returns>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.Join(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.String)">
+            <summary>
+            Concatenate all items in specified Dictionary using specified delimiter and key-value separator. 
+            </summary>
+            <param name="pItems">Dictionary with items to concatenate</param>
+            <param name="pDelimiter">Delimiter to use</param>
+            <param name="pKeyValueSeparator">Separator for key+value</param>
+            <returns>String of concatenated dictionary items</returns>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.JoinFormated(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Concatenate all items in specified Dictionary using specified item-template as a Format-template.
+            </summary>
+            <param name="pItems">Dictionary with items to concatenate</param>
+            <param name="pItemTemplate">The string to be used as a Format-template (is to use use by string.Format(...) method)</param>
+            <returns>String of concatenated dictionary items</returns>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.IndexOfCI(System.Collections.Generic.List{System.String},System.String,System.Int32)">
+            <summary>Case-insensitive search of string in a list</summary>
+            <returns>Returns index of string found or -1 when not found</returns>
+        </member>
+        <member name="M:XService.Utils.CollectionUtils.IsContains(System.Collections.Specialized.NameValueCollection,System.String,System.Boolean)">
+            <summary>
+            Search specified key in specified collection.
+            </summary>
+            <param name="coll">Collection to search key in.</param>
+            <param name="key">Key to search.</param>
+            <param name="ignoreCase">If true search is case-insensitive.</param>
+            <returns>Returns true if specified key found in collection.</returns>
+        </member>
+        <member name="F:XService.Utils.CollectionUtils.nv_delims">
+            <summary>
+            Parse string of format "key1=value1; key2=value2; ... keyN=valueN;"
+            To split key and value instead of '=' you could also use ':'.
+            </summary>
+            <param name="parameters">String to parse</param>
+            <param name="forceLowerCaseKeys">If true all key names will be lowercased</param>
+            <returns>Hastable object that contains parsed parameters.</returns>
+        </member>
+        <member name="T:XService.Utils.NameObjectCollection">
+            <summary>
+            NameObjectCollection class (implementation took from MSDN)
+            </summary>
+        </member>
+        <member name="F:XService.Data.DacService.ConnectionStringName">
+            <summary>Name of connection string to search in App.Config file and use it as 'main db connection'</summary>
+        </member>
+        <member name="M:XService.Data.DacService.GetConnectionStr">
+            <summary>
+            Create DbProviderFactory object for connection string defined in application config file.
+            By default it is seaching for connection string called "SiteDatabase".
+            But name of connection string to search could be changed by specifying other value in *DacService.ConnectionStringName*.
+            </summary>
+            <returns>Instance of DbProviderFactory object</returns>
+        </member>
+        <member name="M:XService.Data.DacService.GetDbFactory">
+            <summary>
+            Create DbProviderFactory object for connection string defined in application config file.
+            By default it is seaching for connection string called "SiteDatabase".
+            But name of connection string to search could be changed by specifying other value in *DacService.ConnectionStringName*.
+            </summary>
+            <returns>Instance of DbProviderFactory object</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:XService.Data.DacService.GetConnection" -->
+        <!-- Badly formed XML comment ignored for member "F:XService.Data.DacService.OnGetCfgValue" -->
+        <member name="M:XService.Data.DacService.GetCfgPrmValue(System.String)">
+            <summary>
+            Read value of parameter with specified name from App.Config file.
+            When value of parameter is enclosed with "{" and "}" it will try to decode it as encrypted text using PasswordService.DecryptPassword() method.
+            When value of parameter is match SecuredText pattern then it will try to decode it using SecuredText algorithm.
+            </summary>
+            <param name="pPrmName">Name of parameter to read value for</param>
+            <returns>Value of parameter with specified name or null if parameter not found</returns>
+        </member>
+        <member name="M:XService.Data.DacService.WaitConnected(System.Data.Common.DbConnection)">
+            <summary>Wait until ADO.NET connection established.</summary>
+            <param name="pConn">Connection to wait for ConnectionState.Open status</param>
+            <returns>Returns true when connection got ConnectionState.Open status after 100 cycles, otherwise returns false</returns>
+        </member>
+        <member name="M:XService.Data.DacService.WaitConnected(System.Data.Common.DbConnection,System.Int32)">
+            <summary>Wait until ADO.NET connection established.</summary>
+            <param name="pConn">Connection to wait for ConnectionState.Open status</param>
+            <param name="pTimeout">Timeout (in seconds) to wait</param>
+            <returns>Returns true when connection got ConnectionState.Open status during specified timeout, otherwise returns false</returns>
+        </member>
+        <member name="M:XService.Data.DacService.NewDbPrm(System.String,System.Data.DbType,System.Object)">
+            <summary>Create new DbParameter object and intiailize it</summary>
+            <param name="pName">Name of parameter to create</param>
+            <param name="pType">Datatype of parameter</param>
+            <param name="pValue">Value of parameter</param>
+            <returns>Instance of new DbParameter object</returns>
+        </member>
+        <member name="M:XService.Data.DacService.NewDbPrm(System.Data.Common.DbProviderFactory,System.String,System.Data.DbType,System.Object)">
+            <summary>Create new DbParameter object and intiailize it</summary>
+            <param name="pName">Name of parameter to create</param>
+            <param name="pType">Datatype of parameter</param>
+            <param name="pValue">Value of parameter</param>
+            <returns>Instance of new DbParameter object</returns>
+        </member>
+        <member name="M:XService.Data.DacService.CutdownToRow(System.Data.DataTable)">
+            <summary>Ensure DataTable object has not more 1 Row</summary>
+            <param name="pRowset">DataTable object to cutdown to 1 Row</param>
+        </member>
+        <member name="M:XService.Data.DacService.CutdownToValue(System.Data.DataTable)">
+            <summary>Ensure DataTable object has not more 1 Column x 1 Row</summary>
+            <param name="pRowset">DataTable object to cutdown to 1 Column x 1 Row</param>
+        </member>
+        <member name="M:XService.Data.DacService.CsBuilderPropertiesToTable(System.Data.Common.DbConnectionStringBuilder)">
+            <summary>Extract all available properties of DbConnectionStringBuilder into a DataTable</summary>
+            <param name="pCsBuilder">DbConnectionStringBuilder to extract properties from</param>
+            <returns>DataTable with all available properties of DbConnectionStringBuilder</returns>
+        </member>
+        <member name="M:XService.Data.DacService.TrimSpaces(System.Data.DataTable)">
+            <summary>Trim spaces at right for all values in DataTable</summary>
+            <param name="pRowset">DataTable object to trim spaces in</param>
+        </member>
+        <member name="M:XService.Data.DacService.SerializeTables(System.Collections.Generic.List{System.Data.DataTable},System.String)">
+            <summary>Serialize list of DataTable objects in single XML file</summary>
+            <param name="pTables">list of DataTable objects to serialize</param>
+            <param name="pFilename">XML filename</param>
+        </member>
+        <member name="M:XService.Data.DacService.SerializeTables(System.Collections.Generic.List{System.Data.DataTable},System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Serialize list of DataTable objects in single XML file</summary>
+            <param name="pTables">list of DataTable objects to serialize</param>
+            <param name="pFilename">XML filename</param>
+            <param name="pExtraProps">Dictionary with extra properties to save</param>
+        </member>
+        <member name="M:XService.Data.DacService.DeserializeTables(System.Collections.Generic.List{System.Data.DataTable},System.String)">
+            <summary>Deserialize list of DataTable objects from single XML file</summary>
+            <param name="pTables">list object to add deserialized DataTable objects into</param>
+            <param name="pFilename">XML filename to deserialized DataTable objects from</param>
+        </member>
+        <member name="M:XService.Data.DacService.DeserializeTables(System.Collections.Generic.List{System.Data.DataTable},System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Deserialize list of DataTable objects from single XML file</summary>
+            <param name="pTables">list object to add deserialized DataTable objects into</param>
+            <param name="pFilename">XML filename to deserialized DataTable objects from</param>
+            <param name="pExtraProps">Dictionary object to save extra properties (if found). Can be null to ignore</param>
+        </member>
+        <member name="M:XService.Data.DacService.EnsureExtraColumns(System.Collections.Generic.Dictionary{System.String,System.String},System.Data.DataTable)">
+            <summary>Create extra columns in specified DataTable object</summary>
+            <param name="pExtraColumnsDefs">Extra columns definitions. key={Name}, value={dataType} + "\t" + {columnExpression}</param>
+            <param name="pTable">Target table to create extra columns in it</param>
+        </member>
+        <member name="M:XService.Data.DacService.StrToScalarType(System.String)">
+            <summary>Convert datatype name to Type object</summary>
+            <param name="tn">datatype name</param>
+            <returns>Type object</returns>
+        </member>
+        <member name="M:XService.Data.DacService.ConfigureStructure(System.Data.DataTable,System.String)">
+            <summary>Setup columns in DataTable object, if column with certain name already exists it will keep it unchanged (even definition is different)</summary>
+            <param name="pTable">DataTable object to setup columns in</param>
+            <param name="pColumnDefs">LOP string with {name[,name2[...,nameN]]}:{datatype}; repeating items which are describing columns</param>
+        </member>
+        <member name="M:XService.Data.DacService.DataTable_ToString(System.Data.DataTable,System.Boolean,System.String,System.String,System.Boolean)">
+            <summary>Concatenate content of DataTable into string</summary>
+            <param name="pTable">DataTable to concatenate content of it</param>
+            <param name="pIncludeHeader">Flag. If to include column captions as 1st line</param>
+            <param name="pCellsDelimiter">Delimiter for cells. If null it will use current ListSeparator</param>
+            <param name="pRowsDelimiter">Delimiter for rows. If null it will use Environment.NewLine</param>
+            <param name="pCsvFormat">If need to use pure CSV format (enclosed values with double quotes when they contains special charactars)</param>
+            <returns>String which is result of DataTable content concatenation</returns>
+        </member>
+        <member name="P:XService.Data.DacService.DebugMode">
+            <summary>Debug mode to show in log all actual params for db connection</summary>
+        </member>
+        <member name="T:XService.Utils.DbgHelper">
+            <summary>
+            Summary description for DbgHelper.
+            </summary>
+        </member>
+        <member name="P:XService.Utils.EnvironmentUtils.IsWindowsPlatform">
+            <summary>
+            Returns true if application is running on Windows platform
+            </summary>
+        </member>
+        <member name="T:XService.Utils.ToolError">
+            <summary>
+            ToolError
+            To present all tool errors which are not classified as any other error class
+            </summary>
+        </member>
+        <member name="T:XService.Utils.ToolConfigError">
+            <summary>
+            ToolConfigError
+            To present errors which appears at configuration loading stage
+            </summary>
+        </member>
+        <member name="T:XService.Utils.ObjectError">
+            <summary>
+            ObjectError
+            To present errors which is related to certain object
+            </summary>
+        </member>
+        <member name="T:XService.Utils.ErrorUtils">
+            <summary>
+            StrUtils - utilities to manipulate Exceptions.
+            </summary>
+        </member>
+        <member name="M:XService.Utils.ErrorUtils.UnrollException(System.Exception)">
+            <summary>Prepare a string which contains info of specified exception and full chain of all internal exceptions</summary>
+        </member>
+        <member name="M:XService.Utils.ErrorUtils.UnrollExceptionMsg(System.Exception,System.Boolean)">
+            <summary>Prepare a string which contains info of specified exception and full chain of all internal exceptions</summary>
+        </member>
+        <member name="M:XService.Utils.ErrorUtils.FormatErrorMsg(System.Exception)">
+            <summary>Return a string which describing specified exception (exception type name + exception message)</summary>
+        </member>
+        <member name="M:XService.Utils.ErrorUtils.FormatStackTrace(System.Exception)">
+            <summary>Return formated string describing stack trace for specified exception</summary>
+        </member>
+        <member name="M:XService.Utils.ErrorUtils.LogException(System.Exception,System.String,System.Diagnostics.TraceSwitch)">
+            <summary>Write exception info into trace log</summary>
+        </member>
+        <member name="M:XService.Utils.ErrorUtils.LogException(System.Exception,System.String,System.Boolean)">
+            <summary>Write exception info into trace log</summary>
+        </member>
+        <member name="T:PAL.IniFile">
+            <summary>
+            The IniFile is standalone, platform-independent engine handling INI files with comments.
+            </summary>
+        </member>
+        <member name="M:PAL.IniFile.#ctor(System.String)">
+            <summary>
+            Create a IniFile object. 
+            INI file content is not loaded. Use the Reload() method to load it.
+            </summary>
+            <param name="pFilename">Filename of INI file to use</param>
+        </member>
+        <member name="M:PAL.IniFile.#ctor(System.String,System.Text.Encoding)">
+            <summary>
+            Create a IniFile object. 
+            INI file content is not loaded. Use the Reload() method to load it.
+            </summary>
+            <param name="pFilename">Filename of INI file to use</param>
+            <param name="pEncoding">Text encoding of INI file</param>
+        </member>
+        <member name="M:PAL.IniFile.Reload">
+            <summary>Force reload an INI file content</summary>
+        </member>
+        <member name="M:PAL.IniFile.IsSectionExists(System.String)">
+            <summary>
+            Check if specified section is exists in loaded INI file content.
+            </summary>
+            <param name="pSectionName">Section name to check</param>
+            <returns></returns>
+        </member>
+        <member name="M:PAL.IniFile.IsValueExists(System.String,System.String)">
+            <summary>
+            Check if specified Item is exists in specified Section in loaded INI file content.
+            </summary>
+            <param name="pSectionName">Section name to check</param>
+            <param name="pValueName">Item name to check</param>
+            <returns>Returns true if specified section exists in INI file</returns>
+        </member>
+        <member name="M:PAL.IniFile.ReadSections(System.Collections.Generic.List{System.String})">
+            <summary>
+            Populate specified list-object with the list of all Sections in a loaded INI file content.
+            </summary>
+            <param name="pTargetList">list-object to populate</param>
+            <returns>Returns a number of newly added items to a list-object</returns>
+        </member>
+        <member name="M:PAL.IniFile.ReadSectionNames(System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            Populate specified list-object with the list of all Items in specified Section in a loaded INI file content.
+            </summary>
+            <param name="pSectionName">Section to scan for names</param>
+            <param name="pTargetList">list-object to populate</param>
+            <returns>Returns a number of newly added items to a list-object</returns>
+        </member>
+        <member name="M:PAL.IniFile.ReadSection(System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Populate specified dictionary object with name+value pairs from specified Section in a loaded INI file content.
+            </summary>
+            <param name="pSectionName">Section to scan for values</param>
+            <param name="pTargetDictionary">dictionary object to populate with data</param>
+            <returns>Number of newly added items to a dictionary object</returns>
+        </member>
+        <member name="M:PAL.IniFile.ReadString(System.String,System.String,System.String)">
+            <summary>
+            Reads a value of specified Item in specified Section from a loaded INI file content.
+            </summary>
+            <param name="pSection">Section to read</param>
+            <param name="pKey">INI item to read</param>
+            <param name="pDefaultValue">Default value to return if INI item or Section is not found</param>
+            <returns>Value of specified Item in specified Section of default value</returns>
+        </member>
+        <member name="M:PAL.IniFile.ReadComment(System.String,System.String)">
+            <summary>Reads a comment for specified Section or Item in section.</summary>
+            <param name="pSection">Section to read comment for</param>
+            <param name="pKey">INI item to read comment for, when null it will read comment only for section</param>
+            <returns>Value of specified Item in specified Section of default value</returns>
+        </member>
+        <member name="M:PAL.IniFile.WriteString(System.String,System.String,System.String)">
+            <summary>
+            Change value of specified item in INI file
+            </summary>
+            <param name="pSectionName">Section name</param>
+            <param name="pValueName">INI item name</param>
+            <param name="pValue">New value to write to specified INI item</param>
+        </member>
+        <member name="M:PAL.IniFile.DeleteSection(System.String)">
+            <summary>
+            Remove whole section from INI file
+            </summary>
+            <param name="pSectionName">Section name</param>
+        </member>
+        <member name="M:PAL.IniFile.DeleteItem(System.String,System.String)">
+            <summary>
+            Delete specified INI item from INI file
+            </summary>
+            <param name="pSectionName">Section name</param>
+            <param name="pValueName">INI item name</param>
+        </member>
+        <member name="M:PAL.IniFile.Save">
+            <summary>
+            Save changes to INI file
+            </summary>
+        </member>
+        <member name="M:PAL.IniFile.SaveAs(System.String)">
+            <summary>
+            Save INI file into file with different name
+            </summary>
+            <param name="pFilename"></param>
+        </member>
+        <member name="M:PAL.IniFile.EnsureLoaded">
+            <summary>
+            Ensure content of INI file loaded.
+            </summary>
+        </member>
+        <member name="P:PAL.IniFile.ForceFixNames">
+            <summary>During load operation it will force upper-case all names of sections and items</summary>
+        </member>
+        <member name="P:PAL.IniFile.AutoFlush">
+            <summary>Set if it should automatically flush all changes made by WriteXxx() methods</summary>
+        </member>
+        <member name="P:PAL.IniFile.IsWritable">
+            <summary>FileInfo object describing source INI file</summary>
+        </member>
+        <member name="P:PAL.IniFile.FileEncoding">
+            <summary>Encoding object describing text encoding of INI file</summary>
+        </member>
+        <member name="P:PAL.IniFile.SourceFileInfo">
+            <summary>FileInfo object describing source INI file</summary>
+        </member>
+        <member name="P:PAL.IniFile.Item(System.String,System.String)">
+            <summary>Accessing specified item in INI file.</summary>
+            <param name="pSection">Section name to address</param>
+            <param name="pKey">Item name to address</param>
+            <returns>Value of specified Item in specified Section or null string if not found</returns>
+        </member>
+        <member name="P:PAL.IniFile.OnSaving">
+            <summary>
+            Called when saving INI file
+            </summary>
+        </member>
+        <member name="T:PAL.IniFile.IniSection">
+            <summary>
+            IniSection
+            </summary>
+        </member>
+        <member name="T:PAL.ReadonlyInifile">
+            <summary>
+            The ReadonlyInifile is descendant of IniFile class which does not allow changing its content, 
+            even if nternal flag was changed to allow INI file content changes.
+            </summary>
+        </member>
+        <member name="M:PAL.ReadonlyInifile.#ctor(System.String)">
+            <summary>
+            Create a ReadonlyInifile object. 
+            INI file content is not loaded. Use the Reload() method to load it.
+            </summary>
+            <param name="pFilename">Filename of INI file to use</param>
+        </member>
+        <member name="M:PAL.ReadonlyInifile.#ctor(System.String,System.Text.Encoding)">
+            <summary>
+            Create a ReadonlyInifile object. 
+            INI file content is not loaded. Use the Reload() method to load it.
+            </summary>
+            <param name="pFilename">Filename of INI file to use</param>
+            <param name="pEncoding">Text encoding of INI file</param>
+        </member>
+        <member name="T:XService.Utils.IO.PathUtils">
+            <summary>
+            PathUtils - utilities to manipulate file pathes and file names
+            </summary>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.IncludeTrailingSlash(System.String)">
+            <summary>Include trailing slash from filepath (both slashes are supported - DirectorySeparatorChar and AltDirectorySeparatorChar)</summary>
+            <param name="str">Filepath to include trailing slash from</param>
+            <returns>Filepath with included trailing slash</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.ExcludeTrailingSlash(System.String)">
+            <summary>Exclude trailing slash from filepath (both slashes are supported - DirectorySeparatorChar and AltDirectorySeparatorChar)</summary>
+            <param name="str">Filepath to exclude trailing slash from</param>
+            <returns>Filepath with excluded trailing slash</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.FixPath(System.String)">
+            <summary>Expand environment variables and replace ref to home-directory ("~/" or "~\") with home directory path</summary>
+            <param name="path">Filepath to replace </param>
+            <returns>Filepath with expanced environment variables and replaced ref to home-directory</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.FixFilename(System.String)">
+            <summary>Replace wrong chars in filename</summary>
+            <param name="path">Filename to fix</param>
+            <returns>Fixed filename</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.FixDirSeparators(System.String)">
+            <summary>Adjust file name/path to use primary directory separator</summary>
+            <param name="name">Filename(path)</param>
+            <returns>Adjusted filename</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.GetSuffixedFilename(System.String,System.String)">
+            <summary>Add specified suffix to filename (insert in front of file extension)</summary>
+            <param name="pFilename">Filename to insert suffix into</param>
+            <param name="pSuffix">Suffix to insert</param>
+            <returns>Filename with inserted suffix</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.LoadFilesList(System.String,System.String)">
+            <summary>Load list of files matching specified filemask from specified path.</summary>
+            <param name="pPath">path to search files in</param>
+            <param name="pFilespec">filespec (files mask), could be multiple delimited by "|" (pipe char)</param>
+            <returns>List of files matching specified filemask</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.LoadFilesList(System.Collections.Generic.List{System.IO.FileInfo},System.String,System.String)">
+            <summary>Load list of files matching specified filemask from specified path.</summary>
+            <param name="pTargetList">List to add files into</param>
+            <param name="pPath">path to search files in</param>
+            <param name="pFilespec">filespec (files mask), could be multiple delimited by "|" (pipe char)</param>
+            <returns>Number of files added to list</returns>
+        </member>
+        <member name="M:XService.Utils.IO.PathUtils.LoadFilesList(System.Collections.Generic.List{System.IO.FileInfo},System.String,System.String,System.Boolean)">
+            <summary>Load list of files matching specified filemask from specified path.</summary>
+            <param name="pTargetList">List to add files into</param>
+            <param name="pPath">path to search files in</param>
+            <param name="pFilespec">filespec (files mask), could be multiple delimited by "|" (pipe char)</param>
+            <param name="pRecursive">Scan recursively subdirectories</param>
+            <returns>Number of files added to list</returns>
+        </member>
+        <member name="P:XService.Utils.IO.PathUtils.InvalidFilenameChars">
+            <summary>Returns string of chars which are invalid for filename</summary>
+        </member>
+        <member name="P:XService.Utils.IO.PathUtils.InvalidPathChars">
+            <summary>Returns string of chars which are invalid for file path</summary>
+        </member>
+        <member name="T:XService.Utils.IO.StreamUtils">
+            <summary>
+            StreamUtils - set of service routines providing extra possibilities of Stream handling
+            </summary>
+        </member>
+        <member name="M:XService.Utils.IO.StreamUtils.StreamToBytes(System.IO.Stream,System.Int32,System.Int32)">
+            <summary>Load bytes from stream into byte[] array</summary>
+            <param name="pStrm">Source stream</param>
+            <param name="pFromPos">From position in stream; when less than 0 then it will load from be from current position</param>
+            <param name="pCount">Number of bytes to load; when less than 0 then it will load rest of bytes from current position</param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.IO.StreamUtils.CalculateHash(System.IO.Stream)">
+            <summary>Calculate hash code of default type for specified stream</summary>
+            <param name="pStrm">Source stream to calculate hash code for data in it</param>
+            <returns>String representation of hashcode</returns>
+        </member>
+        <member name="M:XService.Utils.IO.StreamUtils.CalculateHashEx(System.IO.Stream,System.String)">
+            <summary>Calculate hash code of specified type for specified stream</summary>
+            <param name="pStrm">Source stream to calculate hash code for data in it</param>
+            <param name="pHashName">Type of hashcode to use: MD5, SHA1, SHA256, SHA384, SHA512</param>
+            <returns>String representation of hashcode</returns>
+        </member>
+        <member name="M:XService.Utils.IO.StreamUtils.CalculateHashBytesEx(System.IO.Stream,System.String)">
+            <summary>Calculate hash code of specified type for specified stream</summary>
+            <param name="pStrm">Source stream to calculate hash code for data in it</param>
+            <param name="pHashName">Type of hashcode to use: MD5, SHA1, SHA256, SHA384, SHA512</param>
+            <returns>Original bytes of calculated hashcode</returns>
+        </member>
+        <member name="T:XService.Utils.IO.FileUtils">
+            <summary>
+            FileUtils - set of service routines providing extra possibilities of File handling
+            </summary>
+        </member>
+        <member name="T:XService.Utils.IObserver">
+            <summary>
+            IObserver - is a copy of appropriate interface from Java
+            Used together with Observable class.
+            </summary>
+        </member>
+        <member name="M:XService.Utils.IObserver.update(XService.Utils.Observable,System.Object)">
+            <summary>Notification method to call for observer object</summary>
+            <param name="pSender">Observable object which initiated this call</param>
+            <param name="pArg">Addtional object parameter which was passed into Observable.Notify() method</param>
+        </member>
+        <member name="T:XService.Utils.EventObserverUpdateArg">
+            <summary>
+            EventObserverUpdateArg
+            </summary>
+        </member>
+        <member name="T:XService.Utils.Observable">
+            <summary>
+            Observable - is a copy of appropriate class from Java
+            Used together with IObserver interface.
+            </summary>
+        </member>
+        <member name="M:XService.Utils.Observable.#ctor(System.Object)">
+            <summary>Create new Observable object.</summary>
+            <param name="AOwner">Object which is *owner* of this Observable object</param>
+        </member>
+        <member name="M:XService.Utils.Observable.AddObserver(XService.Utils.IObserver)">
+            <summary>Add new observer to list. Observer object is supposed to implemnt *IObserver* interface. When pObserver is null nothing is added. When this pObserver was already added then nothing done.</summary>
+            <param name="pObserver">Object which will receive notifications about changes in owner of this Observable object</param>
+        </member>
+        <member name="M:XService.Utils.Observable.AddObserver(XService.Utils.Observable.NotificationMethod)">
+            <summary>Add new observer delagate to list. When pObserver is null nothing is added. When this pObserver was already added then nothing done.</summary>
+            <param name="pObserver">Delegate which will receive notifications about changes in owner of this Observable object</param>
+        </member>
+        <member name="M:XService.Utils.Observable.DeleteObserver(XService.Utils.IObserver)">
+            <summary>Remove specified observer from list.</summary>
+            <param name="pObserver">Object which should be removed from list of observers. When specified observer is not in the list it will do nothing</param>
+        </member>
+        <member name="M:XService.Utils.Observable.DeleteObserver(XService.Utils.Observable.NotificationMethod)">
+            <summary>Remove specified observer delegate from list.</summary>
+            <param name="pObserver">Delegte which should be removed from list of observers. When specified observer delegate is not in the list it will do nothing</param>
+        </member>
+        <member name="M:XService.Utils.Observable.HasObserver(XService.Utils.IObserver)">
+            <summary>Return is specified observer delegate is exists in list of observers.</summary>
+            <param name="pObserver">Observer delegate object to search in list of observers</param>
+        </member>
+        <member name="M:XService.Utils.Observable.HasObserver(XService.Utils.Observable.NotificationMethod)">
+            <summary>Return is specified observer is exists in list of observers.</summary>
+            <param name="pObserver">Observer object to search in list of observers</param>
+        </member>
+        <member name="M:XService.Utils.Observable.CountObservers">
+            <summary>Return number of observes and observer delegates in list</summary>
+            <returns>Number of observes and observer delegates in list for this Observable object</returns>
+        </member>
+        <member name="M:XService.Utils.Observable.Clear">
+            <summary>Remove all observers from list and reset *IsChanged* flag in this Observable object to *false*</summary>
+        </member>
+        <member name="M:XService.Utils.Observable.ClearChanged">
+            <summary>Reset *IsChanged* flag in this Observable object to *false*</summary>
+        </member>
+        <member name="M:XService.Utils.Observable.SetChanged">
+            <summary>Set *IsChanged* flag in this Observable object to *true*</summary>
+        </member>
+        <member name="M:XService.Utils.Observable.HasChanged">
+            <summary>Test *IsChanged* flag in this Observable object</summary>
+            <returns>Returns current value of *IsChanged* flag in this Observable object</returns>
+        </member>
+        <member name="M:XService.Utils.Observable.GetOwner">
+            <summary>Returns Owner object for this Observable object</summary>
+            <returns>Owner object for this Observable object</returns>
+        </member>
+        <member name="M:XService.Utils.Observable.NotifyObservers(System.Object)">
+            <summary>
+            If *IsChanged* flag is *true* then it will notify all observers and observer delegates in list for this Observable object.
+            Here *notify* means - call *update(sender, arg)* method for every observer and observer delegate in list.
+            </summary>
+            <param name="arg">Additional object argument to pass to all observers and observer delegates as additional parameter</param>
+        </member>
+        <member name="M:XService.Utils.Observable.NotifyObservers(System.Object,System.Boolean)">
+            <summary>
+            If *IsChanged* flag is *true* or when *pForce* is *true* then it will notify all observers and observer delegates in list for this Observable object.
+            Here *notify* means - call *update(sender, arg)* method for every observer and observer delegate in list.
+            </summary>
+            <param name="arg">Additional object argument to pass to all observers and observer delegates as additional parameter</param>
+        </member>
+        <member name="T:XService.Utils.Observable.NotificationMethod">
+            <summary>
+            Observer delegate method. Can be used instead of object which has to implemnt IObserver intreface.
+            So, using delegates is a specific feature of .NET, so both methods are supported by Observable class - delegates and objects which has to implement IObserver intreface.
+            </summary>
+            <param name="pSender">Observable object which initiated this call</param>
+            <param name="pArg">Addtional object parameter which was passed into Observable.Notify() method</param>
+        </member>
+        <member name="F:XService.Security.SecurityUtils.GENERIC_LOGIN_KEY_TIMEOUT">
+            <summary>Timeout range (in minutes) for Generic Login Key (it works in both direction - minus to* and plus to current timestamp)</summary>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.BuildGenericLoginKey(System.DateTime)">
+            <summary>Build generic login key</summary>
+            <param name="pTs">Timestamp to use as basis for key building</param>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.CheckGenericLoginKey(System.String)">
+            <summary>Check if specified GenericLoginKey is valid for current timestamp</summary>
+            <param name="pKey">Key to validate</param>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.CalculateCRC32(System.UInt32,System.String)">
+            <summary>
+            Calculate CRC32 for specified text
+            </summary>
+            <param name="pCrc">Initial CRC32 value to start calculcation from it</param>
+            <param name="text">Source text to calculate CRC32 for</param>
+            <returns>CRC32 value of specified text</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.CalculateCRC32(System.UInt32,System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Calculate CRC32 value for specified array of bytes
+            </summary>
+            <param name="pCrc">Initial CRC32 value to start calculcation from it</param>
+            <param name="data">Array of bytes to calculate CRC32 value for</param>
+            <param name="Offset">Offset in array of bytes to start calculation from it</param>
+            <param name="Count">Number of bytes to use in calculation</param>
+            <returns>CRC32 value of specified portion in specified array of bytes</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.OpenDirToEveryone(System.String)">
+            <summary>Open specified directory to access by Everyone</summary>
+            <param name="pPath">Path to directory </param>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.OpenFileToEveryone(System.String)">
+            <summary>Open specified file to access by Everyone</summary>
+            <param name="pFilename">Path to file</param>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.Compare(System.Char[],System.Char[])">
+            <summary>Compare 2 texts in char[]. Useful when need to compare sensitive data</summary>
+            <param name="pText1">Text1 to compare</param>
+            <param name="pText2">Text2 to compare</param>
+            <returns>Returns 0 when both are nulls or equal, returns -1 when Text1 is less then Text2, returns 1 when Text1 is greather then Text2</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.ToSecureString(System.String)">
+            <summary>Encode normal string into SecureString object</summary>
+            <param name="pText">normal string value to encode</param>
+            <returns>SecureString object</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.ToSecureString(System.Text.StringBuilder)">
+            <summary>Encode normal string into SecureString object</summary>
+            <param name="pText">normal string value to encode</param>
+            <returns>SecureString object</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.ToSecureString(System.Char[])">
+            <summary>Encode text into SecureString object</summary>
+            <param name="pText">characters to encode</param>
+            <returns>SecureString object</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.FromSecureString(System.Security.SecureString)">
+            <summary>Decode SecureString object to normal string</summary>
+            <param name="ss">SecureString object to decode</param>
+            <returns>Normal string value</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.FromSecureStringCA(System.Security.SecureString)">
+            <summary>Decode SecureString object to array of chars</summary>
+            <param name="ss">SecureString object to decode</param>
+            <returns>Normal string value in a form of char[] array</returns>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.Cleanup(System.Char[])">
+            <summary>Replace content of specified char[] array with trash/random chars</summary>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.Cleanup(System.Text.StringBuilder)">
+            <summary>Replace content of specified StringBuilder with trash/random chars, then clear it</summary>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.CleanupUnmanaged(System.IntPtr,System.Int32)">
+            <summary>Cleanup content of unmanaged memory block, fill it with random data</summary>
+            <param name="unmngData">Unmanaged memory block</param>
+            <param name="pLength">Size in bytes of unmanaged memory block to cleanup</param>
+        </member>
+        <member name="M:XService.Security.SecurityUtils.IsAdminMode">
+            <summary>If application is running in admin-mode</summary>
+        </member>
+        <member name="T:XService.Security.XorRandomizer">
+            <summary>
+            XOR randomizer (XorShift128)
+            </summary>
+        </member>
+        <member name="T:XService.Security.RC4Encryptor">
+            <summary>
+            RC4 chipher.
+            </summary>
+        </member>
+        <member name="M:XService.Shell.SplitCommandToProgramAndArgs(System.String,System.String@,System.String@)">
+            <summary>
+            Split specified command line to program name and program command line arguments
+            </summary>
+            <param name="pCmd">command line to split</param>
+            <param name="pProgram">out: extracted program name</param>
+            <param name="pArguments">out: program command line arguments</param>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.Reset">
+            <summary>Reset all locts and counters</summary>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.GetDiagnosticData(System.String@,System.String@,System.String@,System.Int32@,System.Int32@)">
+            <summary>Return diagnostic data</summary>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.EnteringLock(System.String,System.Object)">
+            <summary>Log and register lock-wait</summary>
+            <param name="pMsg">Lock identification message (for log)</param>
+            <param name="pLockObject">Sync-point object for a lock</param>
+            <returns>LockInfo object describing a lock</returns>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.LockEntered(XService.Utils.SyncUtils.LockInfo)">
+            <summary>Log and remove lock-wait registration. Optionally, register entered lock (if LockInfo.NeedToRegister is true)</summary>
+            <param name="pInfo">LockInfo object describing a lock</param>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.LeavingLock(XService.Utils.SyncUtils.LockInfo)">
+            <summary>Mark lock as exited, remove its registration (if exists)</summary>
+            <param name="pInfo">LockInfo object describing a lock</param>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.GetMaxLockAge">
+            <summary>Search for max age of wait-locks</summary>
+            <returns>Max age (in seconds) of wait-lock (or 0 when no wait-locks registered)</returns>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.GetMaxLockUsage">
+            <summary>Search for max lock usage age of entered-locks</summary>
+            <returns>Max usage age (in seconds) of entered-lock (or 0 when no entered-locks registered)</returns>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.WriteToTrace">
+            <summary>Write to trace Active wait-locks and active entered-locks</summary>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.S_EnteringLock(System.String,System.Object)">
+            <summary>Log and register lock-wait</summary>
+            <param name="pMsg">Lock identification message (for log)</param>
+            <param name="pLockObject">Sync-point object for a lock</param>
+            <returns>LockInfo object describing a lock</returns>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.S_LockEntered(XService.Utils.SyncUtils.LockInfo)">
+            <summary>Log and remove lock-wait registration. Optionally, register entered lock (if LockInfo.NeedToRegister is true)</summary>
+            <param name="pInfo">LockInfo object describing a lock</param>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.S_LeavingLock(XService.Utils.SyncUtils.LockInfo)">
+            <summary>Mark lock as exited, remove its registration (if exists)</summary>
+            <param name="pInfo">LockInfo object describing a lock</param>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.S_WriteToTrace">
+            <summary>Write to trace Active wait-locks and active entered-locks</summary>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.S_GetDiagnosticData(System.String@,System.String@,System.String@,System.Int32@,System.Int32@)">
+            <summary>Return diagnostic data</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.AsDump">
+            <summary>Dump of active wait-locks</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.EnteredLocks">
+            <summary>Dump of entered wait-locks</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.HistoryDump">
+            <summary>Dump of last N wait-locks which were successfully entered</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.DebugMode">
+            <summary>Enable/disable debug-mode (when it will register wait-locks and so on)</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.S_AsDump">
+            <summary>Dump of active wait-locks</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.S_HistoryDump">
+            <summary>Dump of last N wait-locks which were successfully entered</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.S_EnteredLocks">
+            <summary>Dump of entered wait-locks</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.S_DebugMode">
+            <summary>Enable/disable debug-mode (when it will register wait-locks and so on)</summary>
+        </member>
+        <member name="T:XService.Utils.SyncUtils.LockInfo">
+            <summary>Holder or wait-lock</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.Thrd">
+            <summary>Ref to Thread which requested/entered a lock</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.LockObject">
+            <summary>Sync-point object for a lock</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.Message">
+            <summary>Lock identification message (for log)</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.WaitStarted">
+            <summary>When waiting for a lock started</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.LockEntered">
+            <summary>When lock entered</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.LockLeave">
+            <summary>When lock leave</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.NeedToRegister">
+            <summary>If need to register entered lock in internal list</summary>
+        </member>
+        <member name="F:XService.Utils.SyncUtils.LockInfo.Status">
+            <summary>Lock status</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockInfo.WaitAge">
+            <summary>Age (in seconds) of lock-wait</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockInfo.UsageAge">
+            <summary>Age (in seconds) of lock-usage</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockInfo.StatusMarker">
+            <summary>String prefix indicating lock status</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockInfo.AsDump">
+            <summary>Returns debug dump for this lock</summary>
+        </member>
+        <member name="T:XService.Utils.SyncUtils.LockInfo.EStatus">
+            <summary>Status of lock-info object</summary>
+        </member>
+        <member name="T:XService.Utils.SyncUtils.LockedScope">
+            <summary>Holder or auto-processed wait-lock</summary>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.LockedScope.#ctor(System.Object,System.Boolean,System.String)">
+            <summary>
+            Enter locked scope using specified object as sync-point.
+            When TraceMode is ON then also write diagnostic info to trace log and register lock-info.
+            </summary>
+            <param name="pSyncRoot">Sync-point object</param>
+            <param name="pTraceMode">TraceMode, if need to write diagnostic info to trace log and register lock-info</param>
+            <param name="pMsg">Diagnostic message to write to trace log</param>
+        </member>
+        <member name="M:XService.Utils.SyncUtils.LockedScope.#ctor(System.Object,System.Boolean,System.Boolean,System.String)">
+            <summary>
+            Enter locked scope using specified object as sync-point.
+            When TraceMode is ON then also write diagnostic info to trace log and register lock-info.
+            </summary>
+            <param name="pSyncRoot">Sync-point object</param>
+            <param name="pEnterLock">If need to call Monitor.Enter() and then Monitor.Exit()</param>
+            <param name="pTraceMode">TraceMode, if need to write diagnostic info to trace log and register lock-info</param>
+            <param name="pMsg">Diagnostic message to write to trace log</param>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockedScope.SyncObject">
+            <summary>Object used as sync-point</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockedScope.NeedToEnterLock">
+            <summary>If need to enter lock</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockedScope.Entered">
+            <summary>Flag if lock was entered</summary>
+        </member>
+        <member name="P:XService.Utils.SyncUtils.LockedScope.Lock">
+            <summary>LockInfo object</summary>
+        </member>
+        <member name="T:XService.Utils.TypeUtils">
+            <summary>
+            CommonUtils
+            </summary>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.GetTypeById(System.String)">
+            <summary>
+            Returns type by specified identifier.
+            Type identifier should contain full name of type.
+            Optionally it can contains name of assembly in which type if declared.		
+            Type identifier format is:
+              FullTypeName [, AssemblyName]
+            </summary>
+            <param name="pTypeId">Type identifier. Example: "System.Diagnistics.MyTracer,Tracer"</param>
+            <returns>Found type of null if type is not found</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.SearchType(System.String,System.Reflection.Assembly)">
+            <summary>
+            Search specified type (by name) in specified assembly
+            </summary>
+            <param name="TypeName">Name of type to search</param>
+            <param name="asm">Assembly to search type in</param>
+            <returns>Found type of null if type name is not found</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.GetCustomAttribute(System.Type,System.Boolean,System.Type)">
+            <summary>
+            Retrieve custom attribute of specified type.
+            </summary>
+            <param name="AType">Type to retrieve custom attribute from</param>
+            <param name="inherit"></param>
+            <param name="AAttrType">Type of attribute to retrieve</param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.CreateDefaultInstance(System.Type,System.Object[])">
+            <summary>
+            Create instance of specified type.
+            Pass to type constructor specified parameters.
+            </summary>
+            <param name="AType">Type of instance to create</param>
+            <param name="prms">Parameters to pass into type constructor. Use null if not parameters expected</param>
+            <returns>Instance of created object or null if no public default constructor found</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.IsAssemblyLoaded(System.String,System.Reflection.Assembly@)">
+            <summary>
+            Check if specified .NET assembly loaded or not.
+            </summary>
+            <param name="pAssemblyName">Assembly name or filename</param>
+            <param name="pAssembly">out: will return Assembly object for the found assembly or null</param>
+            <returns>Return true if specified .NET assembly is loaded.</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.FindType(System.String)">
+            <summary>
+            Search specified type within all types in all loaded assemblies.
+            </summary>
+            <param name="pFullTypeName">Name of type to search</param>
+            <returns>Returns an instance of found Type or null if not found</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.FindAssembly(System.String)">
+            <summary>
+            Search specified assembly within all loaded assemblies.
+            </summary>
+            <param name="pAsmName">Name of assembly to search</param>
+            <returns>Returns an instance of found Assembly or null if not found</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.GetFileVersionOf(System.Reflection.Assembly)">
+            <summary>Return value specified in [AssemblyFileVersion] for EntryAssembly</summary>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.CompareVersions(System.String,System.String)">
+            <summary>Compare version numbers (expected to be in N1.N2.N3.N4 format). '*' wildcard is supported for any of N1..N4 fields for both version values</summary>
+            <returns>Returns -1 when Version1 is less than Version2, +1 when Version1 is higher than Version2, 0 when both are equal</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.CollectVersionInfoAttributes(System.Collections.Generic.Dictionary{System.String,System.String},System.Reflection.Assembly)">
+            <summary>
+            Returns values of all version-info Assembly attributes for specified Assembly.
+            </summary>
+            <param name="pProps">Target dictionary object to return values to</param>
+            <param name="pAsm">Assembly to scan for version-info attributes</param>
+            <returns>Number of newly added items to a dictionary</returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.LoadAssembly(System.String,System.Boolean)">
+            <summary>
+            LoadAssembly
+            Try to load a .NET assembly with specified name.
+            The name could be a filename or name of assembly.
+            </summary>
+            <param name="pAssemblyName"></param>
+            <param name="pTryLoadViaStream">If true then it will try to read a {pAssemblyName} file and try to load assembly from a stream. Anyway it will do rest of attempts to load assembly.</param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.TypeUtils.ExtractVersionInfo(System.Reflection.Assembly,XService.Utils.VersionInfoBlock@)">
+            <summary>Extact Version Info from specified Assembly</summary>
+            <param name="pAsm">Assembly to extract version info from</param>
+            <param name="pInfo">Output. Version Info for specified Assembly</param>
+            <returns>Returns true when extracted Version Info block is valid (so, it should contains at least Company, Copyright, Version, FileVersion attributes)</returns>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ActualAssembly">
+            <summary>Determing which Assembly should be used for getting path, name, version, etc. You can assign your Assembly object to this property</summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ApplicationHomePath">
+            <summary>
+            Returns the path to direcory with main application executable 
+            </summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ApplicationVersion">
+            <summary>Return value specified in [AssemblyVersion] for EntryAssembly</summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.InformationalVersion">
+            <summary>Return value specified in [AssemblyInformationalVersion] for EntryAssembly</summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ApplicationFileVersion">
+            <summary>Return value specified in [AssemblyFileVersion] for EntryAssembly</summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ApplicationVersionStr">
+            <summary>Return full version string ApplicationVersion + "/" + ApplicationFileVersion</summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.AssemblyHomePath">
+            <summary>
+            Returns the path to direcory with calling assembly (XService)
+            </summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ApplicationExecutableFullPath">
+            <summary>Returns full path to application executable</summary>
+        </member>
+        <member name="P:XService.Utils.TypeUtils.ApplicationName">
+            <summary>Returns name of application executable (without path and extension)</summary>
+        </member>
+        <member name="T:XService.Utils.TypeDispatcher">
+            <summary>
+            Dispatcher interface to work with .NET object using dynamic binding via reflection
+            </summary>
+        </member>
+        <member name="T:XService.Utils.CustomVersionInfoAttribute">
+            <summary>Special class to enable store custom version info in Assembly</summary>
+        </member>
+        <member name="T:XService.Utils.XServiceError">
+            <summary>Base class for all exceptions generated by code in XService.Net2 assmebly</summary> 
+        </member>
+        <member name="T:XService.Utils.ProgramArgument">
+            <summary>
+            Class to store information about one parsed command line argument.
+            </summary>
+        </member>
+        <member name="F:XService.Utils.ProgramArgument.ArgType">
+            <summary>type of command line argument </summary>
+        </member>
+        <member name="F:XService.Utils.ProgramArgument.ArgName">
+            <summary>name of command line argument (in case when argument is an option) </summary>
+        </member>
+        <member name="F:XService.Utils.ProgramArgument.ArgValue">
+            <summary>filename or value of option</summary>
+        </member>
+        <member name="M:XService.Utils.ProgramArgument.IndexOfArgument(System.Collections.Generic.List{XService.Utils.ProgramArgument},System.String)">
+            <summary>Search argument with specified name in specified list</summary>
+            <param name="pList">List to search argument in</param>
+            <param name="pArgName">Argument name</param>
+            <returns>Index of found argument or -1 when not found</returns>
+        </member>
+        <member name="T:XService.Utils.ProgramArgument.EArgumentType">
+            <summary>types of command line argument </summary>
+        </member>
+        <member name="F:XService.Utils.ProgramArgument.EArgumentType.File">
+            <summary>command line argument is a file. Filename expected to be in ArgValue</summary>
+        </member>
+        <member name="F:XService.Utils.ProgramArgument.EArgumentType.Option">
+            <summary>command line argument is an option. Option names will be in ArgName, if option has value it will be in ArgValue (otherwise ArgValue is null)</summary>
+        </member>
+        <member name="T:XService.Utils.BitUtils">
+            <summary>Set of service routinues to operate bytes on a bit level</summary> 
+        </member>
+        <member name="F:XService.Utils.BitUtils.benj_encoding_table">
+            <summary>encoding table for internal encoding algorithm </summary> 
+        </member>
+        <member name="F:XService.Utils.BitUtils.base64_encoding_table">
+            <summary>encoding table for BASE64 (MIME) encoding algorithm</summary>
+        </member>
+        <member name="F:XService.Utils.BitUtils.uue_encoding_table">
+            <summary>encoding table for UU encoding algorithm</summary> 
+        </member>
+        <member name="F:XService.Utils.BitUtils.current_encoding_table">
+            <summary>current encoding table for UU encoding algorithm</summary> 
+        </member>
+        <member name="M:XService.Utils.BitUtils.get_x_bits(System.Byte[],System.Int32,System.Byte)">
+            <summary>
+            Interpret specified array of bytes as array of N-bit sized items and extract J-i item from it
+            </summary>
+            <param name="pArrOfBits">array of bytes to interpret as array of N-bit sized items</param>
+            <param name="pItemIndex">index of item to extract</param>
+            <param name="pBitsPerItem">bits per item. Max value is 32, it cannot operate items longer than 32-bit size</param>
+            <returns>Extracted value.</returns>
+        </member>
+        <member name="M:XService.Utils.BitUtils.set_x_bits(System.Byte[],System.Int32,System.Byte,System.UInt32)">
+            <summary>
+            Interpret specified array of bytes as array of N-bit sized items and set J-i item in it
+            </summary>
+            <param name="pArrOfBits">array of bytes to interpret as array of N-bit sized items</param>
+            <param name="pItemIndex">index of item to extract</param>
+            <param name="pBitsPerItem">bits per item. Max value is 32, it cannot operate items longer than 32-bit size</param>
+            <returns>Extracted value.</returns>
+        </member>
+        <member name="M:XService.Utils.BitUtils.x_encode(XService.Utils.BitUtils.EEncodeBase,System.Byte[],System.UInt32@)">
+            <summary>
+            Interpret specified array of bytes as array of N-bit sized elements (bit sizes vary as 4, 5, 6 bits).
+            Encode every of such N-bit sized element as a ASCII character using string specified in current_encoding_table.
+            </summary>
+            <param name="pBase">Defines size of element in bits</param>
+            <param name="pSrc">Source array of bytes to encode</param>
+            <param name="pChekSumDest">Output. CRC32 of source array of bytes</param>
+            <returns>Returns text string which is represending encoded array of bytes</returns>
+        </member>
+        <member name="M:XService.Utils.BitUtils.x_decode(XService.Utils.BitUtils.EEncodeBase,System.String,System.Byte[]@,System.Int32@,System.UInt32@)">
+            <summary>
+            Interpret specified text as previously encoded array N-bit sized elements. Encoding was done according to current_encoding_table.
+            So, it will decode every character as presentation of N-bit sized element in some data buffer and it will reconstruct that buffer then.
+            </summary>
+            <param name="pBase">Defines size of element in bits</param>
+            <param name="pSrcText">Source text to decode back to binary buffer</param>
+            <param name="pBuffer">Output. Reconstructed array of bytes</param>
+            <param name="pBytesCount">Output. Return size of reconstructed array of bytes</param>        /// 
+            <param name="pChekSumDest">Output. CRC32 of reconstructed array of bytes</param>
+            <returns>Returns true in case when buffer reconstruction was successfull</returns>
+        </member>
+        <member name="M:XService.Utils.BitUtils.AlignTo(System.Int32,System.Int32)">
+            <summary>Align integer number to specified bound. You can use it to align sizes of memory buffers, etc.</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitSwap1(System.UInt32)">
+            <summary>Swap even and odd bits in specified 32bit number</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitSwap2(System.UInt32)">
+            <summary>Swap even and odd pairs of bits in specified 32bit number</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitSwap3(System.UInt32)">
+            <summary>Swap bits in 32bit number by the following rule (rule shown for bits in 1 byte): 01234567 -> 04561237</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitSwap4(System.UInt32)">
+            <summary>Swap bits in 32bit number by the following rule (rule shown bits in 1 byte): 01234567 -> 45670123</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitSwap8(System.UInt32)">
+            <summary>Swap even and odd bytes in 32bit number</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitSwap16(System.UInt32)">
+            <summary>Swap even and odd words in 32bit number</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.I32_bitRotate(System.UInt32)">
+            <summary>Rotate bits in 32 bit number (showing on a bits for 1 byte: 01234567 -> 76543210)</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.FirstNonZeroBit(System.UInt32)">
+            <summary>Return index of first non-zero bit in specified 32 bit uint number (bits indexes starts with 0, max value is 31, when not found returns -1)</summary>
+        </member>
+        <member name="M:XService.Utils.BitUtils.PackDateTime(System.DateTime)">
+            <summary>Pack DateTime into 64 bit integer value</summary>
+            <param name="pTs">DateTime to pack</param>
+            <returns>64 bit integer value representing the source DateTime</returns>
+        </member>
+        <member name="M:XService.Utils.BitUtils.UnpackDateTime(System.Int64)">
+            <summary>Unpack DateTime from 64 bit integer value</summary>
+            <param name="pValue">64 bit integer value to extract DateTime from</param>
+            <returns>DateTime in case of success, otherwise it will return DateTime.MinValue</returns>
+        </member>
+        <member name="T:XService.Utils.BitUtils.EEncodeBase">
+            <summary>type of bytes encoding - how many bits per encoding symbol it should use</summary> 
+        </member>
+        <member name="T:XService.Utils.CommonUtils">
+            <summary>
+            CommonUtils
+            </summary>
+        </member>
+        <member name="F:XService.Utils.CommonUtils.TrcLvl">
+            <summary>All trace logging of XService.Net2 assmebly should use this TraceSwitch</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.LogTraceConfig(System.String)">
+            <summary>Write to log current values of TraceSwitches</summary>
+            <param name="pCaption">ID caption of record in log</param>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.Bytes2Hex(System.Byte[])">
+            <summary>
+            Present array of bytes as string with a list of hexadeciaml numbers.
+            </summary>
+            <param name="pArr">Array of bytes</param>
+            <returns>String with a list of hexadeciaml numbers</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.ParseCmdLine(System.String[],System.Collections.Generic.List{XService.Utils.ProgramArgument})">
+            <summary>
+            Parse specified command line arguments using standard parer.
+            </summary>
+            <param name="pArgs">Source command line arguments to parse</param>
+            <param name="pTargetArgsList">Target list to store parsed command line arguments in form of objects</param>
+            <returns>Number of successfully parsed arguments added to target list</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.BuildOptionsStr(System.UInt32,System.Type)">
+            <summary>Prepare string representing names bit-flag options according to specified Enum type</summary>
+            <param name="pFlagsEnumType">Enum type of bit-flag options</param>
+            <param name="pFlagsValue">Orginary value of bit-flag options</param>
+            <returns>Semicolon-separated list of bit-flag option names specified in pFlagsValue</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.ParseOptionsStr(System.String,System.Type,System.UInt32@)">
+            <summary>Parse string representing bit-flag options according to specified Enum type</summary>
+            <param name="pText">String to parse</param>
+            <param name="pFlagsEnumType">Enum type of bit-flag options</param>
+            <param name="pFlagsValue">Output: orginary value of bit-flag options recognized after input string parsing</param>
+            <returns>Returns true when there were no errors</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.DisposeObjects(System.Collections.ArrayList)">
+            <summary>Dispose all objects in list</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.DisposeObjects``1(System.Collections.Generic.List{``0})">
+            <summary>Dispose all objects in list</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.DisposeObject(System.Object)">
+            <summary>Dispose one specified object</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.DisposeObject(System.Object@)">
+            <summary>Dispose one specified object and set object pointer to null</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.RaiseEvent(System.Object,System.String,System.Object[])">
+            <summary>Call event handler of specified event (by name) for specified object</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.HostInfoStamp">
+            <summary>Returns string consists of system information parameters - computer name, user name, app dir, .NET version, etc</summary>
+        </member>
+        <member name="F:XService.Utils.CommonUtils.HASH_CODE_TYPE">
+            <summary>Default hashcode type to use</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.CalculateHash(System.String)">
+            <summary>Calculate hash code of specified string. Type of hashcode to use specified in HASH_CODE_TYPE static class member</summary>
+            <returns>Hexadecimal string representing hashcode</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.CalculateHashEx(System.String,System.String,System.Text.Encoding)">
+            <summary>Calculate specified hash code type of bytes of specified string, bytes of string are discovered using specified text encoding</summary>
+            <returns>Hexadecimal string representing hashcode</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.CalculateHashBytesEx(System.Byte[],System.String)">
+            <summary>Calculate specified hash code type of specified array of bytes</summary>
+            <returns>Array of bytes of hashcode</returns>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.ObjectToStr(System.Object)">
+            <summary>Return string consists of class name + "@" + object HashCode</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.Swap``1(``0@,``0@)">
+            <summary>Swap 2 values</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.ToLog(System.String,System.String)">
+            <summary>Write (append) specified text into specified file</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.BufferCut(System.Array,System.Int32)">
+            <summary>Remove piece of buffer, just in-place</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.BufferCut(System.Array,System.Int32,System.Int32)">
+            <summary>Remove piece of buffer, just in-place</summary>
+        </member>
+        <member name="M:XService.Utils.CommonUtils.FlagsToStr(System.UInt32,System.Type)">
+            <summary>Build a string of bit-flag names which are turned on in specified FlagsValue</summary>
+        </member>
+        <member name="T:XService.Utils.ETrimOption">
+            <summary>Text trimming options</summary>
+        </member>
+        <member name="T:XService.Utils.StrUtils">
+            <summary>
+            StrUtils - utilities to manipulate strings.
+            </summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_SPACES">
+            <summary>Space characters (space, tab, CR, LF)</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_DIGITS">
+            <summary>Digit characters</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_ALPHA_CHARS_CAPITAL">
+            <summary>Capital latin letters</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_ALPHA_CHARS_SMALL">
+            <summary>Small latin letters</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_ALPHA_CHARS">
+            <summary>All alpha chars (capital latin letters + small latin letters)</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_ALPHA_NUMERIC_CHARS">
+            <summary>All alpha numeric chars (digits + capital latin letters + small latin letters)</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_QUOTES">
+            <summary>Quote characters</summary>
+        </member>
+        <member name="F:XService.Utils.StrUtils.STR_SPECIAL_CHARS">
+            <summary>All chars in range \x00 .. \x1F</summary>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetCisID(System.String)">
+            <summary>Convert ID to case-insensitive form. The idea is to use this convertor for all CIS-identifiers in app</summary>
+            <param name="pID">Identifier to convert to CIS-form</param>
+        </member>
+        <member name="M:XService.Utils.StrUtils.FixNull(System.String)">
+            <summary>Fix null string (for log or dump output)</summary>
+            <param name="pStr">String to check for null</param>
+            <returns>Returns string as-is when not-null or "(null)" when string is null</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.Strng(System.String,System.Int32)">
+            <summary>
+            Return string which is result of *pStr* concatencation *pCount* times.
+            </summary>
+            <param name="pStr">String to multiply</param>
+            <param name="pCount">Number of times to repeat *pStr*</param>
+            <returns>Result</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.Bytes2Hex(System.Byte[],System.String)">
+            <summary>
+            Present array of bytes as string with a list of hexadeciaml numbers.
+            </summary>
+            <param name="arr">Array of bytes</param>
+            <param name="pDelimiter">Delimiter</param>
+            <returns>String with a list of hexadeciaml numbers</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.NameToPhrase(System.String)">
+            <summary>
+            Convert identifier to a text phrase, so insert a space at places before the capital letter in specified identifier.
+            </summary>
+            <param name="s">Identifier to convert</param>
+            <returns>Converted identifier</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsSameText(System.String,System.String)">
+            <summary>
+            Perform case-insensitive comparison to 2 strings
+            </summary>
+            <param name="s1">String 1 to compare</param>
+            <param name="s2">String 2 to compare</param>
+            <returns>True if String 1 equal to String 2, otherwise returns False.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsSameStr(System.String,System.String)">
+            <summary>
+            Perform case-sensitive comparison to 2 strings
+            </summary>
+            <param name="s1">String 1 to compare</param>
+            <param name="s2">String 2 to compare</param>
+            <returns>True if String 1 equal to String 2, otherwise returns False.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsEmptyStr(System.String)">
+            <summary>
+            Returns True if string is null or empty.
+            Deprecated! Please use standard string.IsNullOrEmpty() method instead!
+            </summary>
+            <param name="s"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.AdjustLineBreaks(System.String,System.String)">
+            <summary>
+             Adjust End-Of-Line delimiters in specified text.
+            </summary>
+            <param name="pText">Text to adjust EOL delimiters in</param>
+            <param name="pNewEOL">New EOL delimiter to use</param>
+            <returns>Test with adjusted EOL delimiters</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsValidIdentifier(System.String)">
+            <summary>
+            Check if specified identifier is valid.
+            </summary>
+            <param name="pID">The identifier to be validated.</param>
+            <returns>Returns true if specified identifier is valid.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.FixIdentifier(System.String)">
+            <summary>
+            Fix all invalid chars in the identifier.
+            So, it will replace all 'invalid chars' with '_' (underscore) char.
+            </summary>
+            <param name="pID">The identifier to validate and fix.</param>
+            <returns>Fixed identifier.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExtractQuotedPart(System.String@,System.String@)">
+            <summary>Extract quoted part from string.</summary>
+            <param name="pText">Source string to extract quoted part from</param>
+            <param name="pQuotedPart">Output. Store extracted quoted part in</param>
+            <returns>Returns position in source string where quoted part was extracted from or -1 when no more quoted parts found</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.AnsiQuotedStr(System.String,System.Char)">
+            <summary>Enclose string with specified quote char. If string already contains quote char it will add extra quotes to mask such</summary>
+            <param name="S">String to enclosed with quotes</param>
+            <param name="Quote">Quote char</param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsEnclosedWith(System.String,System.Char)">
+            <summary>Check is string is enclosed with specified char</summary>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsEnclosedWith(System.String,System.Char,System.Char)">
+            <summary>Check is string is enclosed with specified chars (separate chars, at open and close)</summary>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsBool(System.String)">
+            <summary>
+            Converts specified string to boolean value.
+            </summary>
+            <param name="s">String to convert</param>
+            <returns>Returns True if source string is something which could be interpreted as True, so if it match one of following "true", "yes", "on", "1". Otherwise returns False.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsBool(System.String,System.Boolean@)">
+            <summary>
+            Convert specified string to boolean value.
+            It recognize yes, true, on, 1 as true.
+            And recognize no, false, off, 0 as false.
+            </summary>
+            <param name="s">String value to convert.</param>
+            <param name="Value">Where to return a boolean value.</param>
+            <returns>Returns true if boolean value was succesfully recognized. Otherwise returns false.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsInt(System.String,System.Int32@)">
+            <summary>Convert specified string to integer value. It supports +,- also 0x prefix for hexadecimal</summary>
+            <param name="s">String value to convert.</param>
+            <param name="Value">Where to return an integer value.</param>
+            <returns>Returns true if integer value was succesfully recognized. Otherwise returns false.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsLong(System.String,System.Int64@)">
+            <summary>
+            Convert specified string to long integer value.
+            </summary>
+            <param name="s">String value to convert.</param>
+            <param name="Value">Where to return a long integer value.</param>
+            <returns>Returns true if long integer value was succesfully recognized. Otherwise returns false.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsDouble(System.String,System.Double@)">
+            <summary>
+            Convert specified string to double value.
+            </summary>
+            <param name="s">String value to convert.</param>
+            <param name="Value">Where to return an double value.</param>
+            <returns>Returns true if double value was succesfully recognized. Otherwise returns false.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IntToEnumName(System.Int32,System.String)">
+            <summary>Return appropriate string for indexed enum name</summary>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsEnum(System.String,System.String,System.Int32@)">
+            <summary>
+            Convert specified string to integer number which is an index of a enumeration item in specified list.
+            In other words - it converts string to enum value but returns enum value as integer.
+            </summary>
+            <param name="s">String value to convert.</param>
+            <param name="pEnumNames">Comma-separated list of valid enum names</param>
+            <param name="Value">Where to return an integer value.</param>
+            <returns>Returns true if enum value was succesfully recognized. Otherwise returns false.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAsEnumEx(System.String,System.Type,System.Object@)">
+            <summary>
+            Convert specified string to enum value of specified Type. In 
+            </summary>
+            <param name="s">String value to convert.</param>
+            <param name="pEnumType">Type of target enum</param>
+            <param name="Value">Where to return recognized enum value or null (if not recognized).</param>
+            <returns>Returns true if enum value was succesfully recognized. Otherwise returns false.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.StrToIntDef(System.String,System.Int32)">
+            <summary>
+             Try to convert specified string value into int value.
+             If fail returns the specified default value.
+            </summary>
+            <param name="s">String value to convert.</param>
+            <param name="DefaultValue">DefaultValue to use if cannot convert</param>
+            <returns>Integer value which is a result of string converting or DefaultValue if conversion fail</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.StrToLongDef(System.String,System.Int64)">
+            <summary>
+            The same as StrToIntDef but works for long value.
+            </summary>
+            <param name="s"></param>
+            <param name="DefaultValue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.Right(System.String,System.Int32)">
+            <summary>
+            Returns a substring of N chars at right of specified source string.
+            </summary>
+            <param name="s">Source string</param>
+            <param name="n">How many chars at right extract</param>
+            <returns>Substring of N chars at right of specified source string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.TrimText(System.String,XService.Utils.ETrimOption)">
+            <summary>
+            Process specified string as a text (a set of EOL-separated items).
+            Trim spaces in every item and concatenate them back
+            </summary>
+            <param name="pText">Text to trim lines in it</param>
+            <param name="pTrimOption">An option defining where to trim spaces</param>
+            <returns>Same text as input but consists of lines with trimmed spaces</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IncludeStarting(System.String,System.Char)">
+            <summary>
+            Ensure that specified string has specified prefix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="ch">Prefix char to check and include if not found</param>
+            <returns>Source string with prefix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IncludeStarting(System.String,System.String)">
+            <summary>
+            Ensure that specified string has specified prefix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="pattern">Prefix substring to check and include if not found</param>
+            <returns>Source string with prefix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExcludeStarting(System.String,System.Char)">
+            <summary>
+            Ensure that specified string does not have specified prefix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="ch">Prefix char to check and exclude if found</param>
+            <returns>Source string without a prefix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExcludeStarting(System.String,System.String)">
+            <summary>
+            Ensure that specified string does not have specified prefix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="pattern">Prefix substring to check and exclude if found</param>
+            <returns>Source string without a prefix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IncludeTrailing(System.String,System.Char)">
+            <summary>
+            Ensure that specified string has specified suffix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="ch">Suffix char to check and include if not found</param>
+            <returns>Source string with suffix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IncludeTrailing(System.String,System.String)">
+            <summary>
+            Ensure that specified string has specified suffix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="pattern">Suffix substring to check and include if not found</param>
+            <returns>Source string with suffix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExcludeTrailing(System.String,System.Char)">
+            <summary>
+            Ensure that specified string does not have specified suffix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="ch">Prefix char to check and exclude if found</param>
+            <returns>Source string without a suffix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExcludeTrailing(System.String,System.String)">
+            <summary>
+            Ensure that specified string does not have specified suffix.
+            </summary>
+            <param name="str">Source string</param>
+            <param name="pattern">Prefix substring to check and exclude if found</param>
+            <returns>Source string without a suffix</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ParseSingleNameValueItem(System.String,System.String,System.String@,System.String@)">
+            <summary>
+            Parse a text which is expected to be a {name} + {delimiter} + {value}.
+            </summary>
+            <param name="pStr">Source string to parse</param>
+            <param name="pDelimiters">Which delimiters could be used to split name- and value- parts in source string</param>
+            <param name="pName">Out: extracted name part</param>
+            <param name="pValue">Out: extracted value part</param>
+            <returns>Returns true is name and value successfully recognized</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetToPattern(System.String,System.String)">
+            <summary>Extract a part of string before the specified delimiter pattern. When pattern not found it returns null.</summary>
+            <param name="pStr">Source string</param>
+            <param name="pPattern">Delimiter pattern to search</param>
+            <returns>Returns a part of string before the specified delimiter pattern or null delimiter pattern is not found</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.GetAfterPattern(System.String,System.String)">
+            <summary>Extract a part of string after the specified delimiter pattern</summary>
+            <param name="pStr">Source string</param>
+            <param name="pPattern">Delimiter pattern to search</param>
+            <returns>Returns a part of string after the specified delimiter pattern or null delimiter pattern is not found</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.Join(System.String[],System.String)">
+            <summary>
+            Concatenate all items in specified string[] array using specified delimiter. 
+            </summary>
+            <param name="pItems">string[] array with items to concatenate</param>
+            <param name="pDelimiter">Delimiter to use</param>
+            <returns>String of concatenated array items</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.Join(System.Collections.Generic.Dictionary{System.String,System.String},System.String,System.String)">
+            <summary>
+            Concatenate all items in specified Dictionary using specified delimiter and key-value separator. 
+            </summary>
+            <param name="pItems">Dictionary with items to concatenate</param>
+            <param name="pDelimiter">Delimiter to use</param>
+            <param name="pKeyValueSeparator">Separator for key+value</param>
+            <returns>String of concatenated dictionary items</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.JoinFormated(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Concatenate all items in specified Dictionary using specified item-template as a Format-template.
+            </summary>
+            <param name="pItems">Dictionary with items to concatenate</param>
+            <param name="pItemTemplate">The string to be used as a Format-template (is to use use by string.Format(...) method)</param>
+            <returns>String of concatenated dictionary items</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExpandParameters(System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.Boolean)">
+            <summary>
+            Expand macro parameters in specified string.
+            The format of macro parameter in string is "$(" + {name} + ")".
+            Example: "Hello, $(UserName)."
+            Note: parameter names are not case sensitive.
+            </summary>
+            <param name="pStr">String to search and replace macro parameters in</param>
+            <param name="pParams">Dictionary with a set of parameters (name + value pairs)</param>
+            <param name="pExpandEnvironmentVars">If also it should expand environment variables</param>
+            <returns></returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExpandParameters(System.String@,System.String,System.String,XService.Utils.StrUtils.GetParameterValueMethod,System.Object)">
+            <summary>
+            Expand macro parameters in specified string.
+            The format of macro parameter in string is {PrmOpenPattern} + {name} + {PrmClosePattern}.
+            Examples: "Hello, $(UserName)." or "Hello, @UserName@."
+            </summary>
+            <param name="pStr">String to search and replace macro parameters in</param>
+            <param name="pPrmOpenPattern">Parameter open-pattern, a pattern which beging parameter in string</param>
+            <param name="pPrmClosePattern">Parameter close-pattern, a pattern which ends parameter in string</param>
+            <param name="pGetPrmValue">Delegate which returns value for specified parameter name</param>
+            <param name="pContext">Context object</param>
+            <returns>Number of replaced parameters</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ParseIniValues(System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>Parse string as INI-file (without sections). All item names will be force lowercased</summary>
+            <param name="pText">Text to parse</param>
+            <param name="pIniValues">Container to store extracted INI-parameters in</param>
+            <returns>Amount of newly added named parameters into container</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ParseIniValuesEx(System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.Boolean)">
+            <summary>Parse string as INI-file (without sections)</summary>
+            <param name="pText">Text to parse</param>
+            <param name="pIniValues">Container to store extracted INI-parameters in</param>
+            <param name="pForceLowerCase">If need to force lowercase all item names</param>
+            <returns>Amount of newly added named parameters into container</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ParseLop(System.String,System.Collections.Generic.Dictionary{System.String,System.String},System.Boolean)">
+            <summary>Parse LOP format string</summary>
+            <param name="pText">Text to parse</param>
+            <param name="pIniValues">Container to store extracted named parameters</param>
+            <param name="pIgnoreCase">Force lower-case all parameter names</param>
+            <returns>Amount of newly added named parameters into container</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExtractWhile(System.String@,System.String)">
+            <summary>Extract chars from specified string while string chars are exists in specified set of chars.</summary>
+            <param name="pText">Source string to extract from. When non empty string extracted it will be removed from this string.</param>
+            <param name="pChars">Set of 'valid chars' for extraction</param>
+            <returns>Extracted string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExtractUntil(System.String@,System.String)">
+            <summary>Extract chars from specified string until it finds any char which exists in specified set of chars.</summary>
+            <param name="pText">Source string to extract from. When non empty string extracted it will be removed from this string.</param>
+            <param name="pChars">Set of 'stop chars' for extraction</param>
+            <returns>Extracted string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ReplaceCI(System.String,System.String,System.String)">
+            <summary>Case-insensitive replace</summary>
+            <param name="pSource">Source string to search pOldPattern in</param>
+            <param name="pOldPattern">Old text tattern to search and replace</param>
+            <param name="pNewPattern">New text pattern to replace old text pattern</param>
+        </member>
+        <member name="M:XService.Utils.StrUtils.NskTimestampOf(System.DateTime)">
+            <summary>
+            Converts specified DateTime value into NSK-timestamp string
+            </summary>
+            <param name="pDT">DateTime value to convert</param>
+            <returns>NSK-timestamp string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.CompactNskTimestampOf(System.DateTime)">
+            <summary>Converts specified DateTime value into compat form of NSK-timestamp string (yyyyMMdd,hhnnss.ffffff)</summary>
+            <param name="pDT">DateTime value to convert and compact</param>
+            <returns>Compact form of NSK-timestamp string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.CompactNskTimestamp(System.String)">
+            <summary>Compat form of NSK-timestamp string</summary>
+            <param name="pTs">NSK timestamp to compart</param>
+            <returns>Compact form of NSK-timestamp string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.NskTimestampToDateTime(System.String)">
+            <summary>
+            Converts specified NSK-timestamp string to DateTime value.
+            Note: it may lost precision, because .NET time fraction is milliseconds but NSK-timestamp fraction is microseconds.
+            </summary>
+            <param name="pTS">NSK-timestamp string to convert to DateTime value</param>
+            <returns>DateTime value of specified NSK-timestamp string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ReplaceNskTimestampDelimiters(System.String,System.String)">
+            <summary>
+            Replace delimiter chars in NSK-timestamp string with specified delimiters.
+            </summary>
+            <param name="pTs">NSK-timestamp string to replace delimiters in</param>
+            <param name="pDelimiters">Delimiters to use</param>
+            <returns>NSK-timestamp string with replaced delimiters</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.StripNskTimestamp(System.String)">
+            <summary>
+            Remove all delimiter chars from specified NSK-timestamp string, so only digits left
+            </summary>
+            <param name="pTS">NSK-timestamp string</param>
+            <returns>NSK-timestamp string with all removed delimiters</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExtractRegexp(System.String,System.String@)">
+            <summary>
+            Parse source string to extract a regular expression and modifiers from it.
+            Expected source string will have a following format: '/' + {regular expression} + '/' + {modifiers string}.
+            </summary>
+            <param name="pStr">source string to parse.</param>
+            <param name="pModifiers">Out: to return modifiers string into it</param>
+            <returns>The Regex if source string was in correct format, otherwise - null.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExtractRegexp(System.String)">
+            <summary>
+            Parse source string to extract a regular expression and modifiers from it.
+            Expected source string will have a following format: '/' + {regular expression} + '/' + {modifiers string}.
+            </summary>
+            <param name="pStr">source string to parse.</param>
+            <returns>The Regex if source string was in correct format, otherwise - null.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.NumberToStr(System.UInt32,System.Int32)">
+            <summary>Convert specified number to string in specified radix</summary>
+            <param name="pNumber">Number to convert</param>
+            <param name="pBase">Radix</param>
+        </member>
+        <member name="M:XService.Utils.StrUtils.FilespecToRexpStr(System.String)">
+            <summary>Converts *filespec* to regex expression</summary>
+        </member>
+        <member name="M:XService.Utils.StrUtils.FilespecToRexp(System.String)">
+            <summary>Converts *filespec* to regex object</summary>
+        </member>
+        <member name="M:XService.Utils.StrUtils.IsValidEscSeq(System.String,System.Char@,System.Int32@,System.String@)">
+            <summary>
+            Check if passed string contains valid character escapes
+            </summary>
+            <param name="srcStr">String to be checked</param>
+            <param name="realChar">Character by which character escapes should be replaced</param>
+            <param name="len">Length of character escapes</param>
+            <param name="escSeq">The string w/o character escapes</param>
+            <returns>True if character escapes are valid</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.CompileStr(System.String,System.String,System.Boolean)">
+            <summary>Compile stirng - replace character escape-sequenced (C/C# style) with the their actual char values</summary>
+            <param name="s">String to be compiled</param>
+            <param name="disableToCompile">String of characters by which replacement should not be performed</param>
+            <param name="ignoreError">Set to true to raise error for not valid character escapes</param>
+            <returns>Compiled string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.CompileDelphi5Str(System.String)">
+            <summary>Compile stirng - replace character escape-sequenced (Borland Delphi style) with the their actual char values. Errors ignored</summary>
+            <param name="pText">String to be compiled</param>
+            <returns>Compiled string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.DeCompileStr(System.String,System.String)">
+            <summary>Decompile string (this operation is opposite to CompileStr)</summary>
+            <param name="s">String to decompile</param>
+            <param name="forceDeCompile">Chars to be force decompiled</param>
+            <returns>Decompiled string</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.Reverse(System.String)">
+            <summary>Reverse a string</summary>
+            <param name="s">string to reverse</param>
+            <returns>Reversed string</returns>
+        </member>
+        <member name="T:XService.Utils.StrUtils.GetParameterValueMethod">
+            <summary>Deletegate method to return parameter value by specified parameter name</summary>
+            <param name="pPrmName">Parameter name</param>
+            <param name="pPrmValue">Output: parameter value</param>
+            <param name="pContext">Context object</param>
+            <returns>Returns true when parametrer found and value is valid</returns>
+        </member>
+        <member name="T:XService.Utils.TextUtils">
+            <summary>Set of routinues to operate text (assume "text" is a bit higher level abstraction of a string)</summary>
+        </member>
+        <member name="M:XService.Utils.TextUtils.StrToEncoding(System.String)">
+            <summary>Convert Encoding ID string to Encoding object.</summary>
+            <param name="pEncodingID">String representing Encoding ID. When starts with '#' it is expected to be a code page number. When starts with '@' it is expected to be a encoding name</param>
+            <returns>Encoding object if Encoding ID was successfully recognized otherwise null</returns>
+        </member>
+        <member name="M:XService.Utils.TextUtils.DiscoverEOL(System.String)">
+            <summary>
+            Try to guess what EOL (End-Of-Line) marker is used in specified text.
+            </summary>
+            <param name="pText">Source text to check for EOL</param>
+            <returns>EOL value</returns>
+        </member>
+        <member name="M:XService.Utils.TextUtils.RepackText(System.String)">
+            <summary>Trim starting and trailing spaced in each line in specified text</summary>
+        </member>
+        <member name="T:XService.XmlUtils">
+            <summary>
+            Container for routinues related to DOM/XML processing
+            </summary>
+        </member>
+        <member name="M:XService.XmlUtils.SetAttributes(System.Xml.XmlElement,System.String)">
+            <summary>
+            Massive assign of XML element attributes
+            </summary>
+            <param name="pNode">Source XML element to set attributes for it</param>
+            <param name="pAttrDefs">Text defining a set of attributes to assign and values. Text format expected to be like this: {attrName}={value}{;}{attrName}={value}{;}. Example: "attr1=123;attr2=test;attr3=abc;"</param>
+        </member>
+        <member name="M:XService.XmlUtils.GetNodePath(System.Xml.XmlElement)">
+            <summary>
+            Returns string describing a path to specified XML element 
+            </summary>
+            <param name="pNode">Source XML element to returns path for</param>
+            <returns>A "/"-separated list of all parent nodes for specified XML element</returns>
+        </member>
+        <member name="M:XService.XmlUtils.FindElementByAttrValue(System.Xml.XmlElement,System.String,System.String,System.String,System.Boolean)">
+            <summary>Search for child element which have specified value in specified attribute</summary>
+            <param name="pRootNode">Root DOM node with childs of what it should do a search</param>
+            <param name="pNodeName">Name of element to search within. If null-or-empty then we search with all elements</param>
+            <param name="pAttrName">Name of attribute to search</param>
+            <param name="pAttrValue">Value of attribute to match</param>
+            <param name="pRecursive">If it should do recursive search within childs of childs</param>
+            <returns>Returns 1st found occurence of XML element which match specified conditions</returns>
+        </member>
+        <member name="M:XService.XmlUtils.FindElement(System.Xml.XmlElement,System.String,System.Boolean)">
+            <summary>Search for child element with specified name</summary>
+            <param name="pRootNode">Root DOM node with childs of what it should do a search</param>
+            <param name="pNodeName">Name of element to search</param>
+            <param name="pRecursive">If it should do recursive search within childs of childs</param>
+            <returns>Returns 1st found occurence of XML element with specified name</returns>
+        </member>
+        <member name="M:XService.XmlUtils.FindParentNode(System.Xml.XmlElement,System.String,System.Boolean)">
+            <summary>Find parent node with specified name</summary>
+            <param name="pNode">Node to search parent node for</param>
+            <param name="pParentNodeName">Name of parent node to search</param>
+            <param name="pIgnoreCase">If need to use case-insensitive search</param>
+            <returns>Parent node of specified name when found or null when not found</returns>
+        </member>
+        <member name="M:XService.XmlUtils.CleanupNode(System.Xml.XmlElement)">
+            <summary>Remove all kinds of child nodes from specified node</summary>
+        </member>
+        <member name="M:XService.XmlUtils.LoadText(System.Xml.XmlElement)">
+            <summary>Load text from specified node, it could be value from Text-typed node or from CDATA-typed node - all of such will be concatenated</summary>
+        </member>
+        <member name="M:XService.XmlUtils.FindAttribute(System.Xml.XmlElement,System.String,System.Boolean)">
+            <summary>Search for attribute with specified name (case-sensitive or case-insensitive)</summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:XService.XmlUtils.LoadAttributes(System.Collections.Generic.Dictionary{System.String,System.String},System.Xml.XmlElement,System.Boolean)" -->
+        <!-- Badly formed XML comment ignored for member "M:XService.XmlUtils.LoadParameters(System.Collections.Generic.Dictionary{System.String,System.String},System.Xml.XmlElement,System.Boolean)" -->
+        <member name="M:XService.XmlUtils.IterateDomNodes(System.Xml.XmlNode,XService.XmlUtils.DomNodeIteratorMethod,System.Object)">
+            <summary>Iterate over child nodes within specified DOM node and call specified method for each node (including attributes)</summary>
+            <param name="pDomNode">DOM node to perform iteration with childs of</param>
+            <param name="pMethod">Method to call</param>
+            <param name="pContext">Context object to pass to method</param>
+        </member>
+        <member name="M:XService.XmlUtils.LoadNameTableFromConfig(System.Xml.XmlDocument,System.String)">
+            <summary>
+            Get specified CONFIG section and load items into NameTable for specified XmlDocument.
+            </summary>
+            <param name="pDom">XmlDocument object to load items into NameTable for it</param>
+            <param name="pConfigSectionName">Name of CONFIG section to load items from</param>
+            <returns>Returns true when some items loaded; otheriwse false</returns>
+        </member>
+        <member name="M:XService.XmlUtils.GetNodeLevel(System.Xml.XmlNode)">
+            <summary>Calculates hierarchy level of specified DOM node within DOM document</summary>
+            <param name="pNode">DOM node to calculate hierarchy level for</param>
+            <returns>Calculated hierarchy level</returns>
+        </member>
+        <member name="M:XService.XmlUtils.GetParentNode(System.Xml.XmlNode)">
+            <summary>Get parent node of specified DOM node, it also works for XmlAttribute</summary>
+            <param name="pNode">DOM node to obtain parent node for</param>
+            <returns>Parent node of specified node</returns>
+        </member>
+        <member name="M:XService.XmlUtils.GetNodePath(System.Xml.XmlNode)">
+            <summary>Calculates hierarchy path of specified DOM node within DOM document</summary>
+            <param name="pNode">DOM node to calculate hierarchy path for</param>
+            <returns>Calculated hierarchy path</returns>
+        </member>
+        <member name="M:XService.XmlUtils.IterateXml(System.Xml.XmlElement,XService.XmlUtils.XmlIteratorMethod,System.Object)">
+            <summary>Iterator to loop over XML nodes</summary>
+            <param name="pDomNode">DOM node to start iterating from</param>
+            <param name="pMethod">Method to call for each node</param>
+            <param name="pContext">Context object to pass into delegate method</param>
+            <returns>Returns true when it was processed all nodes, returns false when it stop</returns>
+        </member>
+        <member name="M:XService.XmlUtils.CrcOfElement(System.Xml.XmlElement)">
+            <summary>Calculate CRC32 of specified XML element</summary>
+            <param name="pDomNode">XML element to calculate CRC32 of it</param>
+            <returns>CRC32 value (CRC value is XOR'ed with -1)</returns>
+        </member>
+        <member name="M:XService.XmlUtils.CrcOfAppConfig(System.Configuration.Configuration)">
+            <summary>Calculate CRC32 of current app config</summary>
+            <param name="pDomNode">App config object to calculate CRC32 for it</param>
+            <returns>CRC32 value (CRC value is XOR'ed with -1)</returns>
+        </member>
+        <member name="M:XService.XmlUtils.IndexOfNode(System.Xml.XmlNodeList,System.Xml.XmlNode)">
+            <summary>Search specified DOM node in node list, return its index or -1 when not found</summary>
+        </member>
+        <member name="M:XService.XmlUtils.DomToMemoryStream(System.Xml.XmlDocument)">
+            <summary>Write specified DOM document into memory stream using default text encoding</summary>
+        </member>
+        <member name="M:XService.XmlUtils.TransformXml(System.Xml.XmlDocument,System.String,System.String@)">
+            <summary>Transform specified XmlDocument using specified XSLT file</summary>
+            <param name="pDom">XmlDocument to transform</param>
+            <param name="pXsltFilename">XSLT filename</param>
+            <param name="result">Output of XSLT transformation</param>
+        </member>
+        <member name="M:XService.XmlUtils.TransformXml(System.Xml.XmlDocument,System.String,System.String)">
+            <summary>Transform specified XmlDocument using specified XSLT file</summary>
+            <param name="pDom">XmlDocument to transform</param>
+            <param name="pXsltFilename">XSLT filename</param>
+            <param name="pOutputFilename">Filename where to save output of XSLT transformation</param>
+        </member>
+        <member name="T:XService.XmlUtils.DomNodeIteratorMethod">
+            <summary>Method prototype to be used by IterateDomNodes method</summary>
+            <param name="pDomNode">Current DOM node</param>
+            <param name="pContext">Context object</param>
+            <returns>Returns false to stop iterating</returns>
+        </member>
+        <member name="T:XService.XmlUtils.XmlIteratorMethod">
+            <summary>Delegate to be used by XML iterator</summary>
+            <param name="pNode">Current node</param>
+            <param name="pContext">Context</param>
+            <returns>Returns true to continue iterating over XML nodes, returns false to stop</returns>
+        </member>
+    </members>
+</doc>

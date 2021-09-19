@@ -1,0 +1,496 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>XService.UI</name>
+    </assembly>
+    <members>
+        <member name="F:XService.UI.CommonForms.FormAbout.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormAbout.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormAbout.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormEditValue.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormEditValue.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormEditValue.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormSelectItems.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormSelectItems.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.ESelectItemFlags.None">
+            <summary>No flags</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.ESelectItemFlags.SingleItem">
+            <summary>Can select only one item</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.ESelectItemFlags.DialogBox">
+            <summary>Use non-resizable window</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.ESelectItemFlags.NonEmpty">
+            <summary>Should be non-empty selection</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.ESelectItemFlags.DetailsView">
+            <summary>Switch into details view (with columns)</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormSelectItems.ESelectItemFlags.UsePreferedSize">
+            <summary>Switch into details view (with columns)</summary>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.Execute(System.Windows.Forms.Form,System.String,System.String,System.Drawing.Size)">
+            <summary>Display FormShowText UI with specified parameters</summary>
+            <param name="pOwner">Owner form</param>
+            <param name="pCaption">Caption of FormShowText window</param>
+            <param name="pText">Text to show</param>
+            <param name="pWindowSize">Custom window size (or Size.Empty to use default size)</param>
+            <returns>Returns true</returns>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.Execute(System.Windows.Forms.Form,System.String,System.String,System.Drawing.Size,System.Windows.Forms.MessageBoxButtons,System.Threading.EventWaitHandle)">
+            <summary>Display FormShowText UI with specified parameters</summary>
+            <param name="pOwner">Owner form</param>
+            <param name="pCaption">Caption of FormShowText window</param>
+            <param name="pText">Text to show</param>
+            <param name="pWindowSize">Custom window size (or Size.Empty to use default size)</param>
+            <param name="pButtons">Windows buttons (MessaageBox style) to use instead of default [Close] button</param>
+            <param name="pWait"></param>
+            <returns>Returns true</returns>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.Execute(System.Windows.Forms.Form,System.String,System.String,XService.UI.CommonForms.FormShowText.UiParams)">
+            <summary>Display FormShowText UI with specified parameters</summary>
+            <param name="pOwner">Owner form</param>
+            <param name="pCaption">Caption of FormShowText window</param>
+            <param name="pText">Text to show</param>
+            <param name="pUiParams">Custom UI parameters</param>
+            <returns>Returns true</returns>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.ExecuteEx(XService.UI.CommonForms.FormShowText.UiParams)">
+            <summary>Display FormShowText UI with specified parameters</summary>
+            <param name="pUiParams">Custom UI parameters. Note: in this method this instance of UiParams is used explicitly!</param>
+            <returns>Returns true</returns>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:XService.UI.CommonForms.FormShowText.UiParams">
+            <summary>
+            Holder of UI parameters for FormShowText 
+            </summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.Owner">
+            <summary>Form specified as Parent/Owner for FormShowText</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.Instance">
+            <summary>Current instance of FormShowText (set automatically in Display() method, also reset automatically on form closure)</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.Caption">
+            <summary>Caption of FormShowText window</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.Text">
+            <summary>Text to display</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.WindowSize">
+            <summary>Use custom size of FormShowText form</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.WrapText">
+            <summary>Use text wrapping</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.HideButtons">
+            <summary>Hide buttons any at all</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.UseStdButtons">
+            <summary>Use standard Windows buttons (used by MessageBox)</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.Buttons">
+            <summary>Standard Windows buttons (used by MessageBox). But this is used only when UseStdButtons=true</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.MonoWidthFont">
+            <summary>Use monowidth font to display text</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.UseWebView">
+            <summary>Use web-view instead of text view. When UseWebView=true then Text should contain URL to display</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.Wait">
+            <summary>Synchronization event</summary>
+        </member>
+        <member name="F:XService.UI.CommonForms.FormShowText.UiParams.WebViewNavigation">
+            <summary>WebView navigation. When called with e1 != null then it is OnNavigating() call, when e2 != null then it is OnNavigated() call</summary>
+        </member>
+        <member name="M:XService.UI.CommonForms.FormShowText.UiParams.Assign(XService.UI.CommonForms.FormShowText.UiParams)">
+            <summary>Copy parameters from specified source</summary>
+            <param name="pParams">Source UI params to copy all from</param>
+        </member>
+        <member name="T:XService.UI.SidePanelHandler">
+            <summary>
+            Side panel - small togglable panel at right or at left of some window. 
+            The word "side" means - panel is stick to left or to right side of window.
+            Panel can be open/displayed. In such case it shows content of panel and user can operate it. But thete is a [hide] button somewhere on that panel.
+            Panel can be hidden then it shows only a small vertical label with panel caption. By clicking on that label user can open panel back.
+            </summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.#ctor(System.Configuration.ApplicationSettingsBase,System.String,System.Boolean)">
+            <summary>Contstruct togglable side-panel</summary>
+            <param name="pAppSettings">Application settings object to store panel settings in</param>
+            <param name="pSettingName">Name of string item in Application settings to store panel settings</param>
+            <param name="pState">Current state of side-panel</param>
+            <example>
+              this.sideToolsPanel = new SidePanelHandler(Settings.Default, "Side_ToolsPanel", false);
+              this.sideToolsPanel.Setup(this.labToolsShortcut, this.btnToolsHide, this.panTools, this.labToolsCaption, this.splitTools);
+            </example>
+        </member>
+        <member name="F:XService.UI.SidePanelHandler.Width">
+            <summary>Width of side-panel when it is open</summary>
+        </member>
+        <member name="F:XService.UI.SidePanelHandler.BtnHide">
+            <summary>Ref to [Hide] button</summary>
+        </member>
+        <member name="F:XService.UI.SidePanelHandler.LabOpen">
+            <summary>Ref to shortcut label. When panel is hidden only this label is displayed. By clicking this label panel can be opened</summary>
+        </member>
+        <member name="F:XService.UI.SidePanelHandler.LabCaption">
+            <summary>Ref to label control which is Caption of panel. It is visible only when panel is open</summary>
+        </member>
+        <member name="F:XService.UI.SidePanelHandler.PanContent">
+            <summary>Ref to content panel inside side-panel</summary>
+        </member>
+        <member name="F:XService.UI.SidePanelHandler.Split">
+            <summary>Ref to Splitter control which separates opened side-panel from rest of window</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.Setup(System.Windows.Forms.Label,System.Windows.Forms.Button,System.Windows.Forms.Panel,System.Windows.Forms.Label,System.Windows.Forms.Splitter)">
+            <summary>Setup side-panel</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.SerializeView">
+            <summary>Searilize side-panel state into string, save into AppSettings, also return that string</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.DeserializeView(System.String)">
+            <summary>Desearilize side-panel state from string</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.ToggleState(System.Boolean)">
+            <summary>Toggle side-panel state</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.BtnHide_Click(System.Object,System.EventArgs)">
+            <summary>Auto-handler of [hide] button click</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.LabOpen_Click(System.Object,System.EventArgs)">
+            <summary>Auto-handler of [open panel] click</summary>
+        </member>
+        <member name="M:XService.UI.SidePanelHandler.LabOpen_Paint(System.Object,System.Windows.Forms.PaintEventArgs)">
+            <summary>Auto-handler of Paint event for tab-label of side-panel. This lable is only displayed when side-panel is hidden</summary>
+        </member>
+        <member name="P:XService.UI.SidePanelHandler.AppSettings">
+            <summary>Application settings object to store panel settings in</summary>
+        </member>
+        <member name="P:XService.UI.SidePanelHandler.SettingName">
+            <summary>Name of string item in Application settings to store panel settings</summary>
+        </member>
+        <member name="P:XService.UI.SidePanelHandler.State">
+            <summary>Current state of side-panel (ON/OFF)</summary>
+        </member>
+        <member name="F:XService.Utils.CustomListViewSorter.ExtraDelimiter">
+            <summary>Can be set when value should be extracted from column, before specified delimiter</summary>
+        </member>
+        <member name="M:XService.Utils.CustomListViewSorter.HandleColumnClick(XService.Utils.CustomListViewSorter,System.Int32)">
+            <summary>This is the main handler of column click. You only need to call this method</summary>
+            <example>
+            private void lvThus_ColumnClick(object sender, ColumnClickEventArgs e)
+            {
+                if (this.lvComparer == null)
+                {
+                    this.lvComparer = new CustomListViewSorter(lvThus, 0, SortOrder.None, "siis", 0);
+                    lvThus.ListViewItemSorter = this.lvComparer;
+                }
+                CustomListViewSorter.HandleColumnClick((CustomListViewSorter)this.lvThus.ListViewItemSorter, e.Column);
+            }
+            </example>
+            <param name="pSorter"></param>
+            <param name="pColumn"></param>
+        </member>
+        <member name="F:XService.UI.UiTools.TrcLvl">
+            <summary>All trace logging of XService.UI assmebly should use this TraceSwitch</summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:XService.UI.UiTools.RenderInto(System.Windows.Forms.RichTextBox,System.String)" -->
+        <member name="M:XService.UI.UiTools.PagesToList(System.Windows.Forms.TabControl,System.Collections.Generic.List{System.Windows.Forms.TabPage})">
+            <summary>Collect all TabPage objects from TabControl into specified list</summary>
+            <param name="pContainer">TabControl object to collect tab pages from</param>
+            <param name="pList">List where to save TabPage objects</param>
+        </member>
+        <member name="M:XService.UI.UiTools.HideAllPagesBut(System.Windows.Forms.TabControl,System.Collections.Generic.List{System.Windows.Forms.TabPage},System.Windows.Forms.TabPage)">
+            <summary>Hide all tab pages except specified</summary>
+            <param name="pContainer">TabControl object where to hide or show tab pages</param>
+            <param name="pPages">List of all tab pages (previously collected)</param>
+            <param name="pPage">TagPage only to show, if null then all tab pages will be hidden</param>
+        </member>
+        <member name="M:XService.UI.UiTools.ParentFormOf(System.Windows.Forms.Control)">
+            <summary>Return parent Form of specified Control</summary>
+            <param name="pControl">Control to find parent Form for</param>
+            <returns>Returns parent Form of specified Control or null when not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.SerializeFormView(System.Windows.Forms.Form)">
+            <summary>Serialize Form view parameters into a string</summary>
+            <param name="pForm">Form to serialize view parameter for</param>
+            <returns>String in LOP-format with Form view parameters</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.DeserializeFormView(System.String,System.Windows.Forms.Form)">
+            <summary>Deserialize Form view parameters from a string</summary>
+            <param name="pViewInfo">String in LOP-format with Form view parameters to deserialize</param>
+            <param name="pForm">Form to initialize view parameters for</param>
+        </member>
+        <member name="M:XService.UI.UiTools.DeserializeFormView(System.String,System.Windows.Forms.Form,XService.UI.UiTools.CustomAttributeDeserializer)">
+            <summary>Deserialize Form view parameters from a string</summary>
+            <param name="pViewInfo">String in LOP-format with Form view parameters to deserialize</param>
+            <param name="pForm">Form to initialize view parameters for</param>
+            <param name="pDeserializer1">Delegate to deserialize attributes which were not recognized</param>
+        </member>
+        <member name="M:XService.UI.UiTools.DeserializeFormView(System.String,System.Windows.Forms.Form,XService.UI.UiTools.DeserializeCustomUiMethod)">
+            <summary>Deserialize Form view parameters from a string</summary>
+            <param name="pViewInfo">String in LOP-format with Form view parameters to deserialize</param>
+            <param name="pForm">Form to initialize view parameters for</param>
+            <param name="pDeserializer2">Delegate to deserialize attributes which were not recognized</param>
+        </member>
+        <member name="M:XService.UI.UiTools.StrToColor(System.String)">
+            <summary>Convert string into color value. It could be color name or explicit HTML-style color value (prefixed with '#')</summary>
+        </member>
+        <member name="M:XService.UI.UiTools.CTRL_Enable(System.Windows.Forms.Control,System.Boolean,System.Nullable{System.Boolean})">
+            <summary>Enable/disable specified Control, optionally can hide/unhide it</summary>
+            <param name="pCtrl">Control to enable/disable</param>
+            <param name="pEnable">New value for Enabled property</param>
+            <param name="pVisible">Optional. New value for Visible property or null</param>
+        </member>
+        <member name="M:XService.UI.UiTools.ETRL_EnableChilds(System.Windows.Forms.Control,System.Nullable{System.Boolean},System.Nullable{System.Boolean},System.Boolean,System.Collections.Generic.List{System.Type})">
+            <summary>Enable/disable and/or hide/unhide child controls inside specified container</summary>
+            <param name="pContainer">Container to handle controls in</param>
+            <param name="pEnabled">New value Enabled property of child controls. Or null to keep as-is</param>
+            <param name="pVisible">New value for Visible property of child controls. Or null to keep as-is</param>
+            <param name="pRecursive">If need to scan child-of-child recusrsively</param>
+            <param name="pTypes">Optional. List of control types to handle only</param>
+        </member>
+        <member name="M:XService.UI.UiTools.ForEachControl(System.Windows.Forms.Control,XService.UI.UiTools.ChildControlHandler,System.Object)">
+            <summary>Loop over all child controls and call specified delegate</summary>
+            <param name="pCtrl">Control to loop over childs of</param>
+            <param name="pHandler">Delegate method to call</param>
+            <param name="pContext">Context object to pass as parameter</param>
+            <returns>Returns true when succesfully looped over all childs without stop</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.FindChildControlOf(System.Windows.Forms.Control,System.Type)">
+            <summary>Find child control of specified type</summary>
+            <param name="pControl">Where to search Control of specified type</param>
+            <param name="pCtrlType">Type of </param>
+            <returns>Returns Control object or null when not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_SetDoubleBuffering(System.Windows.Forms.DataGridView,System.Boolean)">
+            <summary>Set double-buffering for specified DataGridView</summary>
+            <param name="pDgv">DataGridView to set double-buffering for</param>
+            <param name="pValue">Double-buffering value to set</param>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_SelectRow(System.Windows.Forms.DataGridView,System.Int32)">
+            <summary>Select specified row# in specified DataGridView</summary>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_SerializeColumns(System.Windows.Forms.DataGridView)">
+            <summary>Serialize columns of DataGridView into a semicolon-separated list, where each list item is {ColumnName}={ColunmWidth}</summary>
+            <param name="pDgv">DataGridView to serialize columns of</param>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_DeserializeColumns(System.Windows.Forms.DataGridView,System.String)">
+            <summary>Deserialize a semicolon-separated list into columns of DataGridView, where each list item is {ColumnName}={ColunmWidth}</summary>
+            <param name="pDgv">DataGridView to deserialize columns for</param>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_ToString(System.Windows.Forms.DataGridView,System.Boolean,System.String,System.String)">
+            <summary>Concatenate content of DataGridView control into 1 string</summary>
+            <param name="pDgv">DataGridView control to concatenate content of it</param>
+            <param name="pIncludeHeader">Flag. If to include column captions as 1st line</param>
+            <param name="pCellsDelimiter">Delimiter for cells. If null it will use current ListSeparator</param>
+            <param name="pRowsDelimiter">Delimiter for rows. If null it will use Environment.NewLine</param>
+            <returns>String which is result of DataGridView content concatenation</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_ToStringEx(System.Windows.Forms.DataGridView,System.Boolean,System.String,System.String,System.Boolean)">
+            <summary>Concatenate content of DataGridView control into 1 string</summary>
+            <param name="pDgv">DataGridView control to concatenate content of it</param>
+            <param name="pIncludeHeader">Flag. If to include column captions as 1st line</param>
+            <param name="pCellsDelimiter">Delimiter for cells. If null it will use current ListSeparator</param>
+            <param name="pRowsDelimiter">Delimiter for rows. If null it will use Environment.NewLine</param>
+            <param name="pCsvFormat">If need to use pure CSV format (enclosed values with double quotes when they contains special charactars)</param>
+            <returns>String which is result of DataGridView content concatenation</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_ToClipboard(System.Windows.Forms.DataGridView)">
+            <summary>Concatenate content of DataGridView into string and put into Clipboard</summary>
+        </member>
+        <member name="M:XService.UI.UiTools.DGV_HideColumns(System.Windows.Forms.DataGridView,System.String)">
+            <summary>Hide (or unhide) specified columns in specified DataGridView control</summary>
+            <param name="pDgv">DataGridView control to hide (or unhide) columns for</param>
+            <param name="pColumnsToHide">List of columns to hide. Columns can be identified by ColumnName or by HeaderText. When null it will unhide all hidden columns</param>
+            <returns>Returns number of columns which visibility state was changed by this method</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.DVG_ColumnAsDump(System.Windows.Forms.DataGridView,XService.UI.UiTools.EDvgColumnDumpFlags)">
+            <summary>
+            Dump columnd of DataGridView into a string. Could be useful for debug purposes. 
+            Hidden columns marked with '~'. Column indexes added after '/'. Column display indexes added after '/$'.
+            Format is {visibilityMarker}{ColumnName}[{HeaderText}]={width}/{index}/${displayIndex}
+            </summary>
+            <param name="pView">DataGridView control</param>
+            <param name="pFlags">Flags defining what to dump</param>
+            <returns>String which is result of columns list dumping</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.DVG_IndexOfColumn(System.Windows.Forms.DataGridView,System.String,System.String)">
+            <summary>Search column by Name or by HeaderText</summary>
+            <param name="pView">DataGridView control to search column in</param>
+            <param name="pName">Name of column to search. When null it is ignored</param>
+            <param name="pHeaderText">HeaderText of column to search. When null it is ignored</param>
+            <returns>Index of column it found or -1 when not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.LV_IndexOfTag(System.Windows.Forms.ListView,System.Object)">
+            <summary>Find ListViewItem with specified Tag</summary>
+            <param name="pList">ListView to search ListViewItem in</param>
+            <param name="pTag">Tag to search for</param>
+            <returns>Index of ListViewItem found or -1 when not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.LV_ToString(System.Windows.Forms.ListView,System.Boolean)">
+            <summary>Serialize content of ListView into string</summary>
+            <param name="pView">ListView to copy content from</param>
+            <param name="pIncludeHeader">If need to include header (column names)</param>
+            <returns>Content of ListView in form of string</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.LV_ToString(System.Windows.Forms.ListViewItem,System.Boolean)">
+            <summary>Serialize content of ListViewItem into string</summary>
+            <param name="pItem">ListViewItem to copy content from</param>
+            <param name="pIncludeHeader">If need to include header (column names)</param>
+            <returns>Content of ListView in form of string</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.LV_ToString(System.Windows.Forms.ListViewGroup,System.Boolean)">
+            <summary>Serialize content of ListViewGroup into string</summary>
+            <param name="pGroup">ListViewGroup to copy content from</param>
+            <param name="pIncludeHeader">If need to include header (column names)</param>
+            <returns>Content of ListView in form of string</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.LV_GetSibling(System.Windows.Forms.ListViewItem)">
+            <summary>Get sibling of ListViewItem, the one which will be active after specified ListViewItem deleted</summary>
+            <param name="pItem">The ListViewItem to search sibling for</param>
+            <returns>Sibling of specified ListViewItem or null when no more items</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.FindMdiChildByTag(System.Windows.Forms.Form,System.Object)">
+            <summary>Deprecated. Please use MDI_FindChildByTag() method indead</summary>
+        </member>
+        <member name="M:XService.UI.UiTools.FindMdiChildOf(System.Windows.Forms.Form,System.Type)">
+            <summary>Deprecated. Please use MDI_FindChildOfType() method indead</summary>
+        </member>
+        <member name="M:XService.UI.UiTools.MDI_FindChildByTag(System.Windows.Forms.Form,System.Object)">
+            <summary>Find MDI child form by Tag</summary>
+            <param name="pMdiForm">MDI parent form to search within childs of</param>
+            <param name="pTag">Tag to find</param>
+            <returns>Found MdiChild form or null when specified tag not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.MDI_FindChildOfType(System.Windows.Forms.Form,System.Type)">
+            <summary>Find MDI child form by Type</summary>
+            <param name="pMdiForm">MDI parent form to search within childs of</param>
+            <param name="pFormType">Type MDI form to find</param>
+            <returns>Found MdiChild form or null when specified not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.AddMruItem(System.String,System.String)">
+            <summary>Add new item to MRU list, or when item already in list it will be moved to top position in list</summary>
+            <param name="pFilename">Item to be added to MRU list</param>
+            <param name="pMruList">MRU list serialized to string</param>
+            <returns>New MRU list serialized to string</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.packToMruStr(System.Collections.Generic.List{System.String})">
+            <summary>Pack MRU list items into string, items delimited by '\n'</summary>
+        </member>
+        <member name="M:XService.UI.UiTools.TV_NodeIndexesPath(System.Windows.Forms.TreeNode,System.Collections.Generic.List{System.Int32})">
+            <summary>Build a path of node indexes for selected TreeNode</summary>
+            <param name="pNode">TreeNode to build indexes path for</param>
+            <param name="pTargetList">Target list to store indexes path. Note: list is not cleared before storing indexes path!</param>
+        </member>
+        <member name="M:XService.UI.UiTools.TV_SelectByIndexesPath(System.Windows.Forms.TreeView,System.Collections.Generic.List{System.Int32})">
+            <summary>Select TreeNode according to specified indexes path</summary>
+            <param name="pTree">TreeView control to select TreeNode in</param>
+            <param name="pPath">Indexes path</param>
+        </member>
+        <member name="M:XService.UI.UiTools.TV_SyncSelection(System.Windows.Forms.TreeView,System.Windows.Forms.TreeView)">
+            <summary>Synchronize TreeNode selection between 2 TreeViews</summary>
+            <param name="pSource">Source TreeView to sync from</param>
+            <param name="pTarget">Target TreeView to sync to</param>
+        </member>
+        <member name="M:XService.UI.UiTools.TV_FindByTag(System.Windows.Forms.TreeNode,System.Object,System.Boolean)">
+            <summary>Find TreeNode matching specified Tag object</summary>
+            <param name="pNode">TreeNode to search matching Tag object in</param>
+            <param name="pTagToFind">Tag object to search</param>
+            <param name="pRecursive">If it should search recusively to max available tree depth</param>
+            <returns>TreeNode with matching Tag object of null when not found</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.ForEachTreeNode(System.Windows.Forms.TreeNodeCollection,XService.UI.UiTools.TreeNodeHandler)">
+            <summary>Iterate over all notes in TreeView</summary>
+            <param name="pNodes">Collection of tree nodes to iterate over</param>
+            <param name="pHandler">Delegate to call for every tree node</param>
+            <returns>Return true if it was go through all tree nodes, false when it was stop on some node</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.ForEachTreeNodeEx(System.Windows.Forms.TreeNodeCollection,XService.UI.UiTools.TreeNodeHandlerEx,System.Object)">
+            <summary>Iterate over all notes in TreeView</summary>
+            <param name="pNodes">Collection of tree nodes to iterate over</param>
+            <param name="pHandler">Delegate to call for every tree node</param>
+            <param name="pContext">Context object to pass as parameter</param>
+            <returns>Return true if it was go through all tree nodes, false when it was stop on some node</returns>
+        </member>
+        <member name="M:XService.UI.UiTools.TB_ClearCheckmarks(System.Windows.Forms.ToolStripDropDownButton)">
+            <summary>Clear checkmark states for menu items in specified ToolStripDropDownButton</summary>
+        </member>
+        <member name="T:XService.UI.UiTools.ChildControlHandler">
+            <summary>Delegate metdop to be used by child controls iterator</summary>
+        </member>
+        <member name="T:XService.UI.UiTools.TreeNodeHandler">
+            <summary>Delegate method to use by ForEachTreeNode method</summary>
+            <param name="pNode"></param>
+            <returns>It should return true to continue, it should return false to stop on this node</returns>
+        </member>
+        <member name="T:XService.UI.UiTools.TreeNodeHandlerEx">
+            <summary>Delegate method to use by ForEachTreeNodeEx method</summary>
+            <param name="pNode"></param>
+            <returns>It should return true to continue, it should return false to stop on this node</returns>
+        </member>
+    </members>
+</doc>

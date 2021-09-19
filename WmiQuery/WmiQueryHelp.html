@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <title>WMI Query</title>
+  <link rel="stylesheet" type="text/css" href="css/widgets.css" title="style" />
+  <style>    
+    i { color:#48A020 }
+    textarea { background-color: #EAEFEA }
+  </style>
+</head>
+
+<body>
+
+<h1>WMI  Query</h1>
+<a href="https://onedrive.live.com/embed?cid=D4095215C101CECE&resid=D4095215C101CECE%212922&authkey=AO5-30VFfXNV2KE">
+  Version 1.0.1.3 / 2016.01.11.1009
+</a>
+<hr/>
+
+<ul>
+  <li>
+    <a href="#intro">Introduction</a>
+    <ul>
+      <li><a href="#example1">Example1</a></li>
+    </ul>
+  </li>
+  <li><a href="#supportedParameters">Supported Parameters</a></li>
+  <li><a href="#calculatedColumns">Adding Calculated Columns to DataTable</a></li>      
+  <li><a href="#cmdLine">Command Line Interface</a></li>      
+  <li><a href="#configFile">App.Config File</a></li>      
+  <li><a href="#snippetsManager">Snippets Manager</a></li>        
+  <li><a href="#hints">Hints</a></li>      
+</ul>
+
+<p>
+It is a simple and freeware .NET application to execute WMI queries over Windows systems.
+<br/>
+It is a quite useful tool in a .NET development practice. 
+It allows to:
+<ul>
+<li>check connectivity of particular <i>WMI source</i></li>
+<li>check some WMI query execution aspects - execution time, parametrization, security, etc</li>
+<li>quickly retrieve and inspect data from particular WMI source, save data into a file</li>
+</ul>
+</p>
+
+<p>
+So, the idea is:
+<ul>
+<li>On the "<b>Parameters</b>" tab you define what WMI scrope you want to use.<br />If no scope defined then it will assume current system is the scope.</li>
+<li>On the "<b>Query</b>" tab you define what WQL query you want to execute 
+against <i>WMI scope</i> described on the "<b>Parameters</b>" tab.</li>
+<li>Then you can click [Execute] (or press [F9]) to execute WMI query...</li>
+</ul>
+</p>
+
+<p>
+When certain text line on <i>Query</i> or <i>Parameters</i> tab is started with "--" or with "//" such text line will be ignore as a comment.
+<br/>
+The idea of comments is – you can have lot of parameters and WMI Query statements commented out and it will work, I mean – only the non-commented part will work, so comments will not mess up with it.
+Then, to return any of commented statements back to play you only need to uncomment it and execute query again.
+<br />
+Example: to execute a WMI query over the remote computer you need to uncomment (and adjust values of) the “scope.name=…” and “computer=…” parameters in a “Parameters” text box. Also you may need to uncomment (and adjust values of) the “scope.username=…” and “scope.password=…” parameters.
+</p>  
+
+<p>
+When <i>query</i> contains a ";" it will be interpreted in a special way - text before ";" as <i>WmiClassName</i>, text after ";" as <i>condition</i>.
+<br />
+Example: <br />
+<textarea rows="3" cols="80">
+Win32_Process;name='lsass.exe' or name='far.exe'
+</textarea>
+</p>  
+
+<a name="example1"></a>
+<p>
+<h3>Example 1: Check if specific processes are running on remote server</h3> 
+For example: if you want to execute a WMI query over the remove build server in your company then you need to set parameters like these:
+
+<br/>Query: <br/>
+<textarea rows="3" cols="80">
+-- check if specified processed are running 
+SELECT * FROM Win32_Process
+ WHERE (name = 'lsass.exe' OR name='far.exe' OR name='devenv.exe')
+</textarea>
+
+<br/>Parameters: <br/>
+<textarea rows="5" cols="80">
+Computer = build-n-dev
+scope.name = \\$(computer)\root\cimv2
+scope.username = $(computer)\build
+scope.password = myPassworD971
+</textarea>
+<br/>Identifiers enclosed with "$(", ")" will be replaced with a value of appropriate parameter.
+So, the text pattern "$(computer)" will be replaced with the value of "Computer" parameter (in this example - with the "build-n-dev").
+<br/>You can define parameters with any names and any values. For example, exactly the same parameters set as shown above on this page could be also defined as:
+<br/>
+<textarea rows="6" cols="80">
+Computer = build-n-dev
+User = build-n-dev
+Password = myPassworD971
+scope.name = \\$(computer)\root\cimv2
+scope.username = $(computer)\$(User)
+scope.password = $(Password)
+</textarea>
+
+</p>
+
+<hr/>
+<a name="supportedParameters"></a>
+<p>
+<h2>Supported Parameters</h2>
+Here is a list of supported parameters:
+<ul>
+  <li><b>scope.name</b> - define name of WMI scope, example: "\\$(computer)\root\cimv2"</li>
+  <li><b>scope.authentication</b> - sets the COM authentication level to be used for operations in this connection.
+    <br/>It supports all values acceptable for <i>System.Management.AuthenticationLevel</i> enum data type: <i>Unchanged|Default|None|Connect|Call|Packet|PacketIntegrity|PacketPrivacy</i></li>
+  <li><b>scope.authority</b> - sets the authority to be used to authenticate the specified user.
+    <br />Example: "ntdlmdomain:DOMAIN". Also you can specify "Kerberos:{principal name}".</li>
+  <li><b>scope.impersonation</b> - sets the COM impersonation level to be used for operations in this connection.
+    <br />It supports all values acceptable for <i>System.Management.ImpersonationLevel</i> enum data type: <i>Default|Anonymous|Identify|Impersonate|Delegate</i></li>
+  <li><b>scope.username</b> - sets the user name to be used for the connection operation.
+    <br />Example: "$(domain)\buildUser".</li>
+  <li><b>scope.password</b> - sets the password for the specified user.</li>
+  <li><b>scope.timeoutsec</b> - sets the time-out to apply to the operation.</li>  
+</ul>
+<br />
+All other parameters are not affecting WMI searching explicitly. But they could be used as helper-parameters for parameters mentioned above.
+</p>
+
+<hr/>
+<a name="cmdLine"></a>
+<p>
+<h2>Command Line Interface</h2>
+This tool could be used as command line utitility.
+<br/>Here is the list of supported command line parameters:
+<br/>
+<textarea rows="20" cols="120" wrap="off">
+  -?  - print this message
+  -copyright, -eula  - print a license agreement
+  -cp, --conn-param={text}  - add specified line to connection parameters
+  -eev, --expand-env-vars[=1|0]  - set Expand Environment Variables flag
+  -exec, --execute  - execute current query with current WMI parameters
+  -exit - exit application
+  -hc, --hold-connection  - switch hold-connection flag
+  -q, --query={WQLQuery}  - WQL query to execute
+  -qf, --query-file={filename}  - filename with WQL query to execute
+  -ite, --ignore-to-end  - ignore all cmdline parameters after this parameter
+  -rcp, --reset-conn-params  - cleanup all connection parameters
+  -sn, --snippet={SnippetName}  - choose snippet with specified name
+  -snqry, --snippet-query={SnippetName}  - use query from snippet with specified name
+  -snprm, --snippet-params={SnippetName}  - use parameters from snippet with specified name
+  -sprm, --set-param={name,value}  - set value of specified parameter or add if parameter not found
+  -srx, --save-result-xml={filename}  - same query results into specified XML file
+  -src, --save-result-csv={filename}  - same query results into specified CSV file
+
+Example:
+  WmiQuery.exe -query=\"SELECT * FROM Win32_Process WHERE name = 'devenv.exe'\" -execute -save-result-csv=dev-proc.txt -exit
+  WmiQuery.exe -snippet=\"ListOfUsers\" -execute -save-result-csv=users-list.txt -exit
+</textarea>
+</p>
+
+
+<hr/>
+<a name="configFile"></a>
+<p>
+<h2>App.Config File</h2>
+Application configurarion file (<i>WmiQuery.exe.config</i> and <i>WmiQuery_x86.exe.config</i>) 
+contains following useful sections:
+<ul>
+  <li>
+    &lt;appSettings&gt;
+    <ul>
+      <li><u>QueryText</u> - you can specify default text of WQL query here.</li>
+      <li><u>ParametersText</u> - you can specify default text of Parameters here.</li>
+    </ul>
+  </li>
+  <li>
+    <u>UsefulLinks</u> 
+    - you can specify here useful web-links to display in application menu -> Help -> Useful Links
+    <br/>Format of items in this section is following: <i>Menu item caption = {URL}</i>.
+  </li>
+</ul>
+</p>
+
+
+<hr/>
+<a name="snippetsManager"></a>
+<p>
+<h2>Snippets Manager</h2>
+<i>Snippets Manager</i> allows you to collect useful pieces of WQL queries and parameters in one place.
+
+<br/>
+<br/>Click menu -> Query -> Snippets Manager...
+
+<br/><br/>
+Some important notes:
+<ul>
+  <li>
+    Snippets are stored in a <i>WmiQuery.snippets</i> file of XML format.
+    <br/>Original file supposed to be in the same directory as WmiQuery exe files.
+    <br/>But after first usage WmiQuery.snippets file will be copied into {CommonApplicationData} folder
+    <br/>So, the path to this file will be like this: <i>C:\ProgramData\WmiQuery\WmiQuery.snippets</i>.
+    <br/>WmiQuery.snippets file from directory with WmiQuery exe files will be automatically copied 
+    into {CommonApplicationData} folder when it detects a newer file timestamp for source snippets file.
+    So, please be careful and make backups of your edited WmiQuery.snippets file in {CommonApplicationData} folder
+    if you going to update application executables.
+  </li>
+  <li>
+    After you selected a snippet in Snippets Manager you can click "Apply" to insert selected 
+    snippet into WmiQuery. 
+    Or you can click "Apply only query" or "Apply only parameters" to insert only query or only parameters.
+  </li>
+  <li>
+    You can use snippets from cmdline interface. You can use a full name (like path) of a snippet in collection 
+    or you can use snippet name directly.
+    In case when you using snippet name (without path in collection) it will try to find first matching snippet by specified name.
+    For example - following 3 names are pointing to the same snippet in collection:
+    <ul>
+      <li>"List of processes"</li>
+      <li>"Processes/List of processes"</li>
+      <li>"Snippets/Processes/List of processes"</li>
+    </ul>
+    That is because sample collection of snippets contains only one snippet which has "List of processes" name.
+    <br/>When you are using a full item path in snippets collection there is less chances to match wrong 
+    snippet if there could be a one with the same name.
+  </li>
+</ul>
+</p>
+
+
+<hr/>
+<a name="hints"></a>
+<p>
+<h2>Hints</h2>
+<ul>
+
+<li>To hold created <i>WMI Search Engine</i> object you can click <i>Lock WMI Searcher</i> tool button.<br />
+In such case it will not dispose <i>WMI Search Engine</i> object after query executed and then it will be re-used to execute other queries.<br />
+That can essentially speed-up query execution when you are querying remote server.
+</li>
+
+<li>Inside the application config file (WmiQuery.exe.config or WmiQuery_x86.exe.config) 
+you could define useful urls (in the &lt;UsefulLinks&gt; section).<br />
+They will be shown in the main menu of application: <i>menu -> Help -> Usefull Links</i>.</li>
+
+<li>By default log file is written into %TEMP% directory. 
+You can change that in App.Config file.
+</li>
+
+<li>You can use "--" (2 minus chars) as line comment in WQL query (actually, "//" comments also works). 
+But in current version you can comment only a whole line. <br />
+You cannot comment part of line in WQL query or in parameters. So, if you want to keep some statement in query
+but exclude it from execution you need put it at new line and start line with "--" to comment it out.
+</li>
+
+<li>You also can use environment variables in query or in parameters. <br />
+That is controled by <i>Expand Environment Variables</i> menu item, also there is appropriate cmdline parameter.
+</li>
+
+<li>You can use multiple <i>-execute</i> in cmdline, for one query or for different queries, 
+the same works for other cmdline action-options.
+Example:
+<br/>
+<textarea rows="2" cols="120" wrap="off">
+AdoNetQuery.exe -snippet="CleanupOrders" -execute -snippet="CleanupTrace" -execute -snippet="SetupTestCase" -execute  -exit
+</textarea>
+</li>
+
+<li>All passwords, computer and database names in snippets were altered, so they do not match my real system.
+However, they are useful as an example.
+</li>
+
+<li>All passwords, computer and database names in snippets were altered, so they do not match my real system.<br />
+However, they are useful as an example.
+</li>
+
+</ul>
+
+<p>
+Note: 1st version of tool was originally posted at <a href="http://dmitrybond.wordpress.com/2012/09/20/one-more-wmi-query-tool/">One more WMI Query tool</a>.
+</p>
+
+</body>
+</html>

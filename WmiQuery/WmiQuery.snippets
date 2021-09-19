@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<Registry savedAt="2016-01-05:13:53:22.523000" filename="C:\ProgramData\WmiQuery\WmiQuery.snippets" application="WmiQuery">
+  <Key name="default">
+    <Item name="default" type="string">@</Item>
+  </Key>
+  <Key name="Snippets">
+    <Key name="Processes">
+      <Key name="List of processes">
+        <Item name="Query" type="text"><![CDATA[Win32_Process]]></Item>
+        <Item name="Parameters" type="text"><![CDATA[]]></Item>
+      </Key>
+      <Key name="Processes on remote server">
+        <Item name="Query" type="text"><![CDATA[Win32_Process;name='lsass.exe']]></Item>
+        <Item name="Parameters" type="text"><![CDATA[scope.name = \\$(computer)\root\cimv2
+scope.username = $(computer)\$(user)
+scope.password = $(password)
+
+computer = btoDevVmW2k8
+user = alta
+password = Forget1
+]]></Item>
+      </Key>
+    </Key>
+    <Key name="System Info">
+      <Key name="Hardware Info">
+        <Item name="Query" type="text"><![CDATA[--Select * from Win32_BaseBoard
+--Select * from Win32_BIOS
+--Select * from Win32_DMAChannel 
+--Select * from Win32_IDEController
+--Select * from Win32_OnBoardDevice
+--Select * from Win32_Printer
+--Select * from Win32_PhysicalMemory
+--Select * from Win32_NetworkAdapter
+--Select * from Win32_SystemSlot
+Select * from WIN32_PROCESSOR
+]]></Item>
+        <Item name="Parameters">
+        </Item>
+      </Key>
+      <Key name="Disk Info">
+        <Item name="Query" type="text"><![CDATA[--Select * from Win32_CDROMDrive
+--Select * from Win32_LogicalDisk
+--Select * from Win32_DiskPartition
+--Select * from Win32_Volume
+Select * from Win32_DiskDrive]]></Item>
+        <Item name="Parameters">
+        </Item>
+      </Key>
+      <Key name="Network Info">
+        <Item name="Query" type="text"><![CDATA[--Select * from Win32_LogonSession
+--Select * from WIN32_NetworkClient
+--Select * from Win32_NetworkLoginProfile
+--Select * from Win32_NetworkProtocol
+--Select * from Win32_NetworkConnection
+--Select * from Win32_NetworkAdapter
+--Select * from Win32_NetworkAdapterConfiguration
+Select * from Win32_Share]]></Item>
+        <Item name="Parameters">
+        </Item>
+      </Key>
+    </Key>
+  </Key>
+</Registry>
