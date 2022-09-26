@@ -34,7 +34,7 @@
               * LogSizeOverAction = {Nothing|ResetSize|Rename}  - method of log file routing: nothing or save only 1st NN percents of log or rename log file to *.Lnn
               * MaxRenamedFiles = {number} - how many renamed log files to save when LogSizeOverAction=Rename
               * LinePrefix = {text} - pettern to insert in front of each log line
-              * TimeRouteFilenamePattern = {timestamp-pattern} - pattern for timestamp value to router log files (timestamp value will be inserted as suffix into log filename)
+              * TimeRotationFilenamePattern = {timestamp-pattern} - pattern for timestamp value to router log files (timestamp value will be inserted as suffix into log filename)
               * TimeStampFormat = {timestamp-pattern} - pattern for timestamp value to insert in front of each log line
               * AutoFlush = {false|TRUE} - auto-flush after each log write
               * CleanupOlderThan = {number} [weeks|days|hours|] - auto-delete routed log files which are older than specified time interval, when time specifier is not specified then it is time in minutes
@@ -1823,6 +1823,13 @@
             <param name="pFlagsValue">Output: orginary value of bit-flag options recognized after input string parsing</param>
             <returns>Returns true when there were no errors</returns>
         </member>
+        <member name="M:XService.Utils.CommonUtils.ParseUserId(System.String,System.String@,System.String@)">
+            <summary>Parse windows userId (one of possible formats - "domain\user" or "user@domain")</summary>
+            <param name="pUserId">UserId to parse</param>
+            <param name="pUsername">Output. User name</param>
+            <param name="pDomain">Output. Domain name</param>
+            <returns>Returns true when userIs successfully parsed</returns>
+        </member>
         <member name="M:XService.Utils.CommonUtils.DisposeObjects(System.Collections.ArrayList)">
             <summary>Dispose all objects in list</summary>
         </member>
@@ -2328,6 +2335,12 @@
             </summary>
             <param name="pStr">source string to parse.</param>
             <returns>The Regex if source string was in correct format, otherwise - null.</returns>
+        </member>
+        <member name="M:XService.Utils.StrUtils.ExtractSpecialDirectives(System.String@,System.String@,System.Char,System.Char)">
+            <summary>Check and extract special directives from specified text/statement. In front of text could be some directives enclosed with chOpen/chClose chars</summary>
+            <param name="pStmt">Text/statement to check if special directives specified in it</param>
+            <param name="pDirectives">Output variable to receive special directives</param>
+            <returns>Returns true if special directives found and extracted</returns>
         </member>
         <member name="M:XService.Utils.StrUtils.NumberToStr(System.UInt32,System.Int32)">
             <summary>Convert specified number to string in specified radix</summary>
