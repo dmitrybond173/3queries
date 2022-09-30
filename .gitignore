@@ -1,6 +1,6 @@
 # Compiled Object files
 *.suo
-bin/*.*
-obj/*.*
 *.vshost.*
 *.obj
+bin/
+obj/
