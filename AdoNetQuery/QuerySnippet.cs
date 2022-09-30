@@ -25,6 +25,7 @@ namespace AdoNetQuery
         /// <summary>The source code of snippet</summary>
         public string Query { get; set; }
 
+        /// <summary>Parameters for snippet</summary>
         public string Parameters { get; set; }
 
         public void Assign(QuerySnippet pSource)
